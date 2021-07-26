@@ -14,7 +14,9 @@ class Plugin {
       content += `| ${homepage ? `[${name}](${homepage})` : name} | ${version} | ${description} |\n`;
     });
     const input = fs.readFileSync(path.join(__dirname, 'coreplugins.md')).toString();
-    const output = input.replace('{{{REPLACE_ME}}}', content);
+    const output = input
+      .replace('{{{VERSION}}}', App.instance.pkg.version)
+      .replace('{{{REPLACE_ME}}}', content);
     fs.writeFileSync(path.join(__dirname, '..', 'temp-coreplugins.md'), output);
   }
 }
