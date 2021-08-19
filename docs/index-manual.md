@@ -1,8 +1,11 @@
-# Developer guides
-This section provides guides and how-to information to help understand and make use of the Adapt authoring tool APIs in a practical way.
+![](https://www.adaptlearning.org/wp-content/uploads/2015/11/home-icon-03.png)
 
-If you're new to the authoring tool, the below pages are a good place to start.
+# Adapt authoring tool
 
-| ![](css/assets/install.png) | ![](css/assets/configure.png) | ![](css/assets/run.png) |
-| :-: | :-: | :-: |
-| [Install](manual/install.html) | [Configure](manual/temp-configuration.html) | [Run](manual/run.html) |
+## Developer guides
+
+> Handy guides and how-to information to help understand and make use of the Adapt authoring tool APIs in a practical way.
+
+[Install](install)
+[Configure](temp-configuration)
+[Run](run)
