@@ -8,6 +8,7 @@
     "manualSections": {
       "coremodules.md": "basics",
       "customising.md": "advanced",
+      "error-handling.md": "basics",
       "module-breakdown.md": "basics",
       "module-security.md": "advanced",
       "temp-folder.md": "basics",
