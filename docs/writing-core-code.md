@@ -1,4 +1,4 @@
-# Writing code for the open-source project
+# Writing core code
 
 ## Check there's a need
 ## Write a specification
