@@ -7,9 +7,12 @@
     "manualPlugins": ["docs/plugins/coremodules.js"],
     "manualSections": {
       "coremodules.md": "basics",
+      "customising.md": "advanced",
       "module-breakdown.md": "basics",
+      "module-security.md": "advanced",
       "temp-folder.md": "basics",
-      "writing-a-core-module.md": "contributing"
+      "writing-a-module.md": "basics",
+      "writing-core-code.md": "contributing"
     }
   }
 }
