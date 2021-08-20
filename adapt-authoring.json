@@ -6,9 +6,9 @@
     "sourceIndex": "docs/index-docs.md",
     "manualPlugins": ["docs/plugins/coremodules.js"],
     "manualSections": {
-      "module-breakdown.md": "The basics",
-      "temp-folder.md": "The basics",
-      "writing-a-core-module.md": "Contributing"
+      "module-breakdown.md": "basics",
+      "temp-folder.md": "basics",
+      "writing-a-core-module.md": "contributing"
     }
   }
 }
