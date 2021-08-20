@@ -6,6 +6,7 @@
     "sourceIndex": "docs/index-docs.md",
     "manualPlugins": ["docs/plugins/coremodules.js"],
     "manualSections": {
+      "coremodules.md": "basics",
       "module-breakdown.md": "basics",
       "temp-folder.md": "basics",
       "writing-a-core-module.md": "contributing"
