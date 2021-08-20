@@ -3,6 +3,7 @@
   "documentation": {
     "enable": true,
     "manualIndex": "docs/index-manual.md",
-    "sourceIndex": "docs/index-docs.md"
+    "sourceIndex": "docs/index-docs.md",
+    "manualPlugins": ["docs/plugins/coreplugins.js"]
   }
 }
