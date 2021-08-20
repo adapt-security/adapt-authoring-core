@@ -4,6 +4,6 @@
     "enable": true,
     "manualIndex": "docs/index-manual.md",
     "sourceIndex": "docs/index-docs.md",
-    "manualPlugins": ["docs/plugins/coreplugins.js"]
+    "manualPlugins": ["docs/plugins/coremodules.js"]
   }
 }
