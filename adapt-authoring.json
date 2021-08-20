@@ -4,6 +4,11 @@
     "enable": true,
     "manualIndex": "docs/index-manual.md",
     "sourceIndex": "docs/index-docs.md",
-    "manualPlugins": ["docs/plugins/coremodules.js"]
+    "manualPlugins": ["docs/plugins/coremodules.js"],
+    "manualSections": {
+      "module-breakdown.md": "The basics",
+      "temp-folder.md": "The basics",
+      "writing-a-core-module.md": "Contributing"
+    }
   }
 }
