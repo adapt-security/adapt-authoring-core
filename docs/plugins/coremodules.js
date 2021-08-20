@@ -12,8 +12,8 @@ class Configuration {
       const { version, description, homepage } = config;
       content += `| ${homepage ? `[${name}](${homepage})` : name} | ${version} | ${description} |\n`;
     });
-    const input = fs.readFileSync(path.join(__dirname, 'coreplugins.md')).toString();
-    const outputPath = `${outputDir}/coreplugins.md`;
+    const input = fs.readFileSync(path.join(__dirname, 'coremodules.md')).toString();
+    const outputPath = `${outputDir}/coremodules.md`;
     const output = input
       .replace('{{{VERSION}}}', app.pkg.version)
       .replace('{{{REPLACE_ME}}}', content);
