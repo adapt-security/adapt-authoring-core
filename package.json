@@ -12,5 +12,8 @@
     "fs-extra": "8.1.0",
     "glob": "7.1.6",
     "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "comment-parser": "^1.2.4"
   }
 }
