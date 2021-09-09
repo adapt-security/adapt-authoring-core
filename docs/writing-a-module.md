@@ -108,7 +108,7 @@ If you plan to add user-configurable settings to your module, you can add a `con
 
 ### _Optional task: add MongoDB schemas_
 
-Any data you wish to push to the database must be accompanied with a schema to define the shape and structure of the data. You may be able to make use of schemas defined in other modules, but you will most likely need to create your own for your specific uses. For more information on creating schemas, see [this page](schemas-introduction).
+Any data you wish to push to the database must be accompanied with a schema to define the shape and content of the data. You may be able to make use of schemas defined in other modules, but you will most likely need to create your own for your specific uses. For more information on creating schemas, see [this page](schemas-introduction).
 
 ### _Optional task: write unit tests_
 
