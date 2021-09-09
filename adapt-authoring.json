@@ -10,10 +10,9 @@
     ],
     "manualSections": {
       "binscripts.md": "basics",
-      "coremodules.md": "basics",
+      "coremodules.md": "reference",
       "customising.md": "advanced",
-      "error-handling.md": "basics",
-      "module-breakdown.md": "basics",
+      "error-handling.md": "advanced",
       "module-security.md": "advanced",
       "temp-folder.md": "basics",
       "writing-a-module.md": "basics",
