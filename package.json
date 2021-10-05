@@ -4,8 +4,8 @@
   "description": "A bundle of reusable 'core' functionality",
   "homepage": "https://github.com/adaptlearning/adapt-authoring-core",
   "license": "GPL-3.0",
-  "repository": "adaptlearning/adapt-authoring-core",
   "main": "index.js",
+  "repository": "adaptlearning/adapt-authoring-core",
   "dependencies": {
     "async": "2.6.1",
     "axios": "^0.21.1",
