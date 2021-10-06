@@ -5,10 +5,12 @@ The authoring tool core bundle includes a number of useful scripts which make se
 
 To run a bin script, you must use the npx command which comes bundled with npm which and used to execute node modules. Scripts are run using the following format: **npx** followed by the **script name**, with any **flags or parameters** coming at the end.
 
-As an example, a task called `aat-myscript` may be run like so:
+As an example, a task called `at-myscript` may be run like so:
+
+> We prefix any core authoring tool scripts `at-` for transparency (as an added bonus they also come towards the top of the `bin/` folder in `node_modules`!).
 
 ```bash
-npx aat-myscript --test=true
+npx at-myscript --test=true
 ```
 
 See the [official npx docs](https://docs.npmjs.com/cli/v7/commands/npx) for more information on npx.
