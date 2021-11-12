@@ -5,7 +5,7 @@
     "manualIndex": "docs/index-manual.md",
     "sourceIndex": "docs/index-docs.md",
     "manualPages": {
-      "binscripts.md": "basics",
+      "binscripts.md": "reference",
       "coremodules.md": "reference",
       "customising.md": "advanced",
       "error-handling.md": "advanced",
