@@ -6,7 +6,7 @@
   "license": "GPL-3.0",
   "type": "module",
   "main": "index.js",
-  "repository": "adaptlearning/adapt-authoring-core",
+  "repository": "github:adapt-security/adapt-authoring-core",
   "dependencies": {
     "fs-extra": "8.1.0",
     "glob": "7.1.6",
