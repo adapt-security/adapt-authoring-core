@@ -1,7 +1,6 @@
-const fs = require('fs-extra');
-const path = require('path');
+import fs from 'fs';
 
-class Configuration {
+export default class Configuration {
   constructor(app, config, outputDir) {
     let content = ``;
     Object.entries(app.dependencies).sort((a,b) => {
@@ -12,7 +11,7 @@ class Configuration {
       const { version, description, homepage } = config;
       content += `| ${homepage ? `[${name}](${homepage})` : name} | ${version} | ${description} |\n`;
     });
-    const input = fs.readFileSync(path.join(__dirname, 'coremodules.md')).toString();
+    const input = fs.readFileSync(new URL('coremodules.md', import.meta.url)).toString();
     const outputPath = `${outputDir}/coremodules.md`;
     const output = input
       .replace('{{{VERSION}}}', app.pkg.version)
@@ -22,5 +21,3 @@ class Configuration {
     this.customFiles = [outputPath];
   }
 }
-
-module.exports = Configuration;

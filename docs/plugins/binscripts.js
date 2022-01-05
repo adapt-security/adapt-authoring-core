@@ -1,8 +1,9 @@
-const fs = require('fs-extra');
-const { parse } = require('comment-parser');
-const path = require('path');
+import { fileURLToPath } from 'url';
+import fs from 'fs-extra';
+import { parse } from 'comment-parser';
+import path from 'path';
 
-class BinScripts {
+export default class BinScripts {
   constructor(app, config, outputDir) {
     this.app = app;
     this.outputDir = outputDir;
@@ -55,11 +56,9 @@ class BinScripts {
     return content;
   }
   async writeFile(content) {
-    const input = fs.readFileSync(path.join(__dirname, 'binscripts.md')).toString();
+    const input = fs.readFileSync(fileURLToPath(new URL('binscripts.md', import.meta.url))).toString();
     const outputPath = `${this.outputDir}/binscripts.md`;
     fs.writeFileSync(outputPath, input.replace('{{{REPLACE_ME}}}', content));
     this.customFiles = [outputPath];
   }
 }
-
-module.exports = BinScripts;
