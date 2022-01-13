@@ -2,10 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
-    "rootDir": {
-      "description": "Path to the root folder",
-      "type": "string"
-    },
     "uploadTempDir": {
       "type": "string",
       "description": "Temporary directory for file uploads",
