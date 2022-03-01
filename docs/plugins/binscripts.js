@@ -1,7 +1,6 @@
 import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
 import { parse } from 'comment-parser';
-import path from 'path';
 
 export default class BinScripts {
   constructor(app, config, outputDir) {
