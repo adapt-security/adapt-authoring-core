@@ -3,9 +3,9 @@ import fs from 'fs-extra';
 import { parse } from 'comment-parser';
 
 export default class BinScripts {
-  constructor(app, config, outputDir) {
+  constructor(app, config) {
     this.app = app;
-    this.outputDir = outputDir;
+    this.outputDir = config.outputDir;
   }
   async run() {
     const data = await this.getScriptData();
