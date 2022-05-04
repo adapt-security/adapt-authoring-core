@@ -1,6 +1,6 @@
 # Welcome!
 
-This is the home of the official API reference documentation for the Node.js back-end of the Adapt authoring tool.
+This is the home of the official API reference documentation for the Node.js back-end of the Adapt authoring tool  (for the front-end docs, see [this page]()).
 
 The Adapt authoring tool is a server-based user interface for authoring eLearning courses using the Adapt framework.
 
