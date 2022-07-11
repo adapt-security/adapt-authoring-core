@@ -2,6 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
+    "isProduction": {
+      "type": "boolean",
+      "description": "Whether this app configuration is a production environment",
+      "default": true
+    },
     "uploadTempDir": {
       "type": "string",
       "description": "Temporary directory for file uploads",
