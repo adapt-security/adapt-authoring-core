@@ -8,7 +8,6 @@
       "binscripts.md": "reference",
       "coremodules.md": "reference",
       "customising.md": "advanced",
-      "error-handling.md": "advanced",
       "module-security.md": "advanced",
       "temp-folder.md": "basics",
       "writing-a-module.md": "basics",
