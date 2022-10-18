@@ -7,10 +7,17 @@
       "description": "Whether this app configuration is a production environment",
       "default": true
     },
-    "uploadTempDir": {
+    "dataDir": {
       "type": "string",
-      "description": "Temporary directory for file uploads",
-      "default": "temp/formidable"
+      "description": "Directory for persistant application data",
+      "isDirectory": true,
+      "default": "$ROOT/data"
+    },
+    "tempDir": {
+      "type": "string",
+      "description": "Temporary directory for application data",
+      "isDirectory": true,
+      "default": "$ROOT/temp"
     }
   }
 }
