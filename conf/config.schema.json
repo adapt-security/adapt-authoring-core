@@ -11,13 +11,13 @@
       "type": "string",
       "description": "Directory for persistant application data",
       "isDirectory": true,
-      "default": "$ROOT/data"
+      "default": "$ROOT/APP_DATA/data"
     },
     "tempDir": {
       "type": "string",
       "description": "Temporary directory for application data",
       "isDirectory": true,
-      "default": "$ROOT/temp"
+      "default": "$ROOT/APP_DATA/temp"
     }
   }
 }
