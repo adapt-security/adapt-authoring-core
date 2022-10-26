@@ -9,7 +9,7 @@
       "coremodules.md": "reference",
       "customising.md": "advanced",
       "module-security.md": "advanced",
-      "temp-folder.md": "basics",
+      "temp-folder.md": "getting-started",
       "writing-a-module.md": "basics",
       "writing-core-code.md": "contributing"
     },
