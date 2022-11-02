@@ -3,20 +3,17 @@ import fs from 'fs-extra';
 import { parse } from 'comment-parser';
 
 export default class BinScripts {
-  constructor(app, config) {
-    this.app = app;
-    this.outputDir = config.outputDir;
-  }
   async run() {
-    const data = await this.getScriptData();
-    const contents = this.dataToMd(data);
-    this.writeFile(contents);
+    this.manualFile = 'binscripts.md';
+    this.replace = { REPLACE_ME: await this.generateMd() }
   }
-  async getScriptData() {
-    const allData = await Promise.all(Object.values(this.app.dependencies).map(this.processDep));
-    return allData
+  async generateMd() {
+    const allDeps = await Promise.all(Object.values(this.app.dependencies).map(this.processDep));
+    return allDeps
       .reduce((m, d) => d ? m.concat(d) : m, [])
-      .sort((a,b) => a.name.localeCompare(b.name));
+      .sort((a,b) => a.name.localeCompare(b.name))
+      .map(d => this.dataToMd(d))
+      .join('\n');
   }
   async processDep({ name, bin, rootDir }) {
     if(!bin) {
@@ -38,26 +35,12 @@ export default class BinScripts {
       return data;
     }));
   }
-  dataToMd(data) {
-    let content = '';
-    data.forEach(({ name, description, moduleName, params }) => {
-      content += `<h2 class="script" id="${name}">${name} <span class="module">from ${moduleName}</span></h2>\n\n`;
-      content += `<div class="details">\n`;
-      content += `<p class="description">${description}</p>\n`;
-      if(params) {
-        content += `<b>Params</b>\n`;
-        content += `<ul>\n`;
-        params.forEach(p => content += `<li><code>${p.name}</code> ${p.description}</li>\n`);
-        content += `</ul>\n`;
-      }
-      content += `</div>\n\n`;
-    });
+  dataToMd({ name, description, moduleName, params }) {
+    let content = `<h2 class="script" id="${name}">${name} <span class="module">from ${moduleName}</span></h2>`
+    content += `<div class="details"><p class="description">${description}</p>`;
+    if(params) {
+      content += `<p><b>Params</b><ul>${params.reduce((s,p) => `${s}<li><code>${p.name}</code> ${p.description}</li>`, '')}</ul></p>`;
+    }
     return content;
-  }
-  async writeFile(content) {
-    const input = fs.readFileSync(fileURLToPath(new URL('binscripts.md', import.meta.url))).toString();
-    const outputPath = `${this.outputDir}/binscripts.md`;
-    fs.writeFileSync(outputPath, input.replace('{{{REPLACE_ME}}}', content));
-    this.customFiles = [outputPath];
   }
 }
