@@ -1,4 +1,3 @@
-import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
 import { parse } from 'comment-parser';
 
