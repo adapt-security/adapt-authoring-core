@@ -32,7 +32,7 @@ The below is what we recommend, and is the approach taken by the the core dev te
 If your module needs to export more than just your main module class, you must make sure your module class uses the key `Module` in order to be loaded by DependencyLoader. For example:
 
 ```
-module.exports = {
+export default {
   Module: MyModuleClass,
   utils: MyUtilsClass,
   // ...other exports
@@ -83,7 +83,7 @@ See below for an example:
 ```javascript
 const { AbstractModule } = require('adapt-authoring-core');
 
-class MyModule extends AbstractModule {
+export default class MyModule extends AbstractModule {
   /** @override */
   async init() {
     // Initialisation tasks go in here
@@ -98,8 +98,6 @@ class MyModule extends AbstractModule {
     // We know the api and jsonschema modules are ready here
   }
 }
-
-module.exports = MyModule;
 ```
 
 ### _Optional task: add a configuration schema_
