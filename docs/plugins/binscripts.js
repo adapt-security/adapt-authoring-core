@@ -15,7 +15,7 @@ export default class BinScripts {
       .join('\n');
   }
   async processDep({ name, bin, rootDir }) {
-    if(!bin) {
+    if(!bin || typeof bin === 'string') {
       return;
     }
     return await Promise.all(Object.entries(bin).map(async ([scriptName, filePath]) => {
