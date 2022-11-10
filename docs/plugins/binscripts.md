@@ -15,7 +15,7 @@ npx at-myscript --test=true
 
 See the [official npx docs](https://docs.npmjs.com/cli/v7/commands/npx) for more information on npx.
 
-{{{REPLACE_ME}}}
+{{{CONTENT}}}
 
 <style>
   h2.script {

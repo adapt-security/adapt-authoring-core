@@ -4,7 +4,7 @@ import { parse } from 'comment-parser';
 export default class BinScripts {
   async run() {
     this.manualFile = 'binscripts.md';
-    this.replace = { REPLACE_ME: await this.generateMd() }
+    this.replace = { CONTENT: await this.generateMd() }
   }
   async generateMd() {
     const allDeps = await Promise.all(Object.values(this.app.dependencies).map(this.processDep));

@@ -3,7 +3,7 @@ export default class CoreModules {
     this.manualFile = 'coremodules.md';
     this.replace = {
       VERSION: this.app.pkg.version,
-      REPLACE_ME: this.generateMd()
+      MODULES: this.generateMd()
     };
   }
   generateMd() {

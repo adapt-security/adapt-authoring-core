@@ -3,4 +3,4 @@ The following modules are included in Adapt authoring v{{{VERSION}}} core packag
 
 | Name | Version | Description |
 | ---- | :-----: | ----------- |
-{{{REPLACE_ME}}}
+{{{MODULES}}}
