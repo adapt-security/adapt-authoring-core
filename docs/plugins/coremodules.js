@@ -14,6 +14,6 @@ export default class CoreModules {
     }).reduce((s, [name, config]) => {
       const { version, description, homepage } = config;
       return s += `| ${homepage ? `[${name}](${homepage})` : name} | ${version} | ${description} |\n`;
-    }, '');
+    }, '| Name | Version | Description |\n| - | :-: | - |');
   }
 }
