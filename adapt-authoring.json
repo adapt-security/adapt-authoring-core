@@ -7,10 +7,10 @@
     "manualPages": {
       "binscripts.md": "reference",
       "coremodules.md": "reference",
-      "data-folder.md": "getting-started",
+      "data-folder.md": "basics",
       "customising.md": "advanced",
       "licensing.md": "reference",
-      "temp-folder.md": "getting-started",
+      "temp-folder.md": "basics",
       "writing-a-module.md": "basics",
       "writing-core-code.md": "contributing"
     },
