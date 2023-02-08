@@ -7,13 +7,9 @@ export default class CoreModules {
     };
   }
   generateMd() {
-    return Object.entries(this.app.dependencies).sort((a,b) => {
-      if(a[0] < b[0]) return -1;
-      if(a[0] > b[0]) return 1;
-      return 0;
-    }).reduce((s, [name, config]) => {
-      const { version, description, homepage } = config;
-      return s += `| ${homepage ? `[${name}](${homepage})` : name} | ${version} | ${description} |\n`;
+    return Object.keys(this.app.dependencies).sort().reduce((s, name) => {
+      const { version, description, homepage } = this.app.dependencies[name];
+      return s += `\n| ${homepage ? `[${name}](${homepage})` : name} | ${version} | ${description} |`;
     }, '| Name | Version | Description |\n| - | :-: | - |');
   }
 }
