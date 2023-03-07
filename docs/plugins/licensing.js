@@ -56,8 +56,9 @@ export default class Licensing {
         const { GITHUB_USER, GITHUB_TOKEN } = process.env;
         const res = await fetch(`https://api.github.com/licenses/${l.toLowerCase()}`, { headers: { Authorization: `Basic ${Buffer.from(`${GITHUB_USER}:${GITHUB_TOKEN}`).toString('base64')}` } });
         if(res.status === 200) Object.assign(this.licenses[l], await res.json() );
+        if(res.status > 299) console.error(`Failed to fetch '${l}' license: (${res.status}) ${(await res.json()).message}`);
       } catch(e) {
-        console.log(e);
+        console.error(e);
       }
     }
   }
