@@ -12,5 +12,9 @@
     "glob": "7.1.6",
     "lodash": "^4.17.21",
     "minimist": "^1.2.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.36.0",
+    "standard": "^17.0.0"
   }
 }
