@@ -8,7 +8,7 @@
   "main": "index.js",
   "repository": "github:adapt-security/adapt-authoring-core",
   "dependencies": {
-    "fs-extra": "8.1.0",
+    "fs-extra": "11.2.0",
     "glob": "^10.3.10",
     "lodash": "^4.17.21",
     "minimist": "^1.2.8"
