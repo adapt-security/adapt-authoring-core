@@ -2,7 +2,7 @@
   "name": "adapt-authoring-core",
   "version": "0.0.1",
   "description": "A bundle of reusable 'core' functionality",
-  "homepage": "https://github.com/adaptlearning/adapt-authoring-core",
+  "homepage": "https://github.com/adapt-security/adapt-authoring-core",
   "license": "GPL-3.0",
   "type": "module",
   "main": "index.js",
