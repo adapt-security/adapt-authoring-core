@@ -83,17 +83,19 @@ export default class Licensing {
 
     Object.keys(this.licenses)
       .sort()
-      .forEach(l => md += `| ${l} | ${this.licenses[l].count} |\n`)
+      .forEach(l => {
+        md += `| ${l} | ${this.licenses[l].count} |\n`
+      })
 
     return md
   }
 
   async generateLicenseDetailsMd () {
     let md = ''
-    Object.entries(this.licenses).forEach(([key, { name, spdx_id, description, body, permissions }]) => {
+    Object.entries(this.licenses).forEach(([key, { name, spdxId, description, body, permissions }]) => {
       if (!name) return
       md += '<details>\n'
-      md += `<summary>${name} (${spdx_id})</summary>\n`
+      md += `<summary>${name} (${spdxId})</summary>\n`
       md += `<p>${description}</p>\n`
       md += `<p>This license allows the following:\n<ul>${permissions.map(p => `<li>${this.permissionsMap(p)}</li>`).join('\n')}</ul></p>\n`
       md += '<p>The original license text is as follows:</p>\n'
@@ -113,7 +115,9 @@ export default class Licensing {
 
   async generateMd () {
     let md = '<tr><th>Name</th><th>Version</th><th>License</th><th>Description</th></tr>\n'
-    this.dependencies.forEach(pkg => md += `<tr><td>${pkg.homepage ? `<a href="${pkg.homepage}" target="_blank">${pkg.name}</a>` : pkg.name}</td><td>${pkg.version}</td><td>${pkg.license}</td><td>${pkg.description}</tr>\n`)
+    this.dependencies.forEach(pkg => {
+      md += `<tr><td>${pkg.homepage ? `<a href="${pkg.homepage}" target="_blank">${pkg.name}</a>` : pkg.name}</td><td>${pkg.version}</td><td>${pkg.license}</td><td>${pkg.description}</tr>\n`
+    })
     return `<details>\n<summary>Module dependency list</summary>\n<table>${md}</table>\n</details>`
   }
 }
