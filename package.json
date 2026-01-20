@@ -9,7 +9,7 @@
   "repository": "github:adapt-security/adapt-authoring-core",
   "dependencies": {
     "fs-extra": "11.3.3",
-    "glob": "^11.0.0",
+    "glob": "^13.0.0",
     "lodash": "^4.17.21",
     "minimist": "^1.2.8"
   },
