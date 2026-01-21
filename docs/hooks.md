@@ -6,13 +6,13 @@ Hooks allow modules to react to events and extend functionality without modifyin
 
 A hook is a point in the code where external observers can run their own functions. When a hook is invoked, all registered observers are called with the same arguments.
 
-All hook observers must complete before the operation continues. For example, a document won't be inserted until all `preInsertHook` observers have finished.
+All hook observers must complete before the operation continues. For example, a document won't be inserted until all `preInsertHook` observers have finished executing.
 
 ### Mutable vs. non-mutable
 
 Hooks can be either **mutable** or **immutable**:
 
-- **Immutable**: the _default_ behaviour, observers receive a deep copy of any arguments to ensure that the original data is read-only and prevent unintended modifications. Observers are run in parallel (at the same time) be default.
+- **Immutable**: the _default_ behaviour, observers receive a deep copy of any arguments to ensure that the original data is read-only and prevent unintended modifications. By default, observers are run in parallel (at the same time).
 - **Mutable**: hooks allow modification of param data, and run observers in series (one after another) to ensure modifications are applied in order.
 
 ## Basic usage
@@ -97,7 +97,7 @@ try {
 ## Best practices
 
 1. **Keep observers focused** — Each observer should do one thing well
-2. **Handle errors gracefully** — Don't let one observer break the entire flow unless intended
+2. **Handle errors gracefully** — Don't let one observer break the entire flow (unless intended)
 3. **Avoid side effects in non-mutable hooks** — They receive copies of data, so modifications won't persist
 4. **Use descriptive names** — Try to name your hooks clearly, and try to follow established patterns (see below for examples)
 6. **Consider execution order** — For mutable hooks, observers run in the order they were registered. Keep this in mind both as the hook creator, and as the hook observer.
@@ -117,7 +117,6 @@ Below are some commonly used hooks, which you may find useful.
 | AbstractApiModule | `preDeleteHook` | Before document delete | `(doc, options, mongoOptions)` | No |
 | AbstractApiModule | `postDeleteHook` | After document delete | `(doc)` | No |
 | AbstractApiModule | `accessCheckHook` | Check document access | `(req, doc)` | No |
-| JsonSchema | `buildHook` | Schema has been built | | No |
 | AdaptFrameworkBuild | `preBuildHook` | Before course build starts | | Yes |
 | AdaptFrameworkBuild | `postBuildHook` | After course build completes | | Yes |
 | AdaptFrameworkImport | `preImportHook` | Before course import starts | | No |
