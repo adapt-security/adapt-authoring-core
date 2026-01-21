@@ -9,6 +9,7 @@
       "coremodules.md": "reference",
       "data-folder.md": "basics",
       "customising.md": "advanced",
+      "hooks.md": "basics",
       "licensing.md": "reference",
       "temp-folder.md": "basics",
       "writing-a-module.md": "basics",
