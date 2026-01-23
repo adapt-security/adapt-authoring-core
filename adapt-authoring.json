@@ -16,7 +16,6 @@
       "licensing.md": "reference",
       "peer-review.md": "contributing",
       "releasing.md": "contributing",
-      "run.md": "getting-started",
       "writing-a-module.md": "development",
       "writing-core-code.md": "contributing"
     },
