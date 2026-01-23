@@ -1,54 +1,45 @@
 # Contributing to the project
 
-First of all, thank you for showing interest in the Adapt project! We heartily welcome any contribution however big or small. This page outlines a few ways you can get involved.
+Thank you for your interest in contributing to the Adapt authoring tool! Whether you're fixing a bug, adding a feature, improving documentation, or just helping others in the community, your contribution is valued.
 
-## 1. Explore the community
+## Join the community
 
-The Adapt project has a thriving, friendly community who have an incredible knowledge of the inner-workings of Adapt - make as much use of this as you can. 
+The Adapt project has a friendly, knowledgeable community — make the most of it.
 
-### Say hello
+**Chat with us** — Drop by our [adapt-authoring room](https://gitter.im/adaptlearning/adapt-authoring) on Gitter to ask questions or say hello. For general Adapt discussion, there's also [general_chat](https://gitter.im/adaptlearning/general_chat). You'll need a GitHub account to join.
 
-If this is your first time contributing, please drop by our [general_chat](https://gitter.im/adaptlearning/general_chat) stream on Gitter and introduce yourself (you'll need a GitHub account to do this) - we love seeing new faces!
+**Visit the community site** — The [Adapt Learning community site](https://www.adaptlearning.org/) is the project hub, with forums, resources, and links to all corners of the project.
 
-For chat specifically related to the authoring tool, the [adapt-authoring room](https://gitter.im/adaptlearning/adapt-authoring) is the place to go.
-
-### Head to the community site
-
-The community site acts as the project hub; first and foremost providing you with links to all corners of the Adapt project, such as the issue tracker, and source code.
-
-At the heart of the community site are the forums, and one of the best ways you can contribute to the project is to share your knowledge of Adapt in here. The only requirement is that you like a chat!
-
-
-## 2. Find something to work on
-
-The next step to getting involved is to find something to actually work on. Based on your skills and interests, there are a number of different areas that you can help out with.
+## Ways to contribute
 
 ### Report issues
 
-One of the easiest ways to make a meaningful contribution to the project is to submit any bugs you find to the relevant repo:
+Found a bug? Have an idea for a feature? Submit it to the relevant repository:
+
+- [Adapt authoring tool](https://github.com/adapt-security/adapt-authoring/issues)
 - [Adapt Framework](https://github.com/adaptlearning/adapt_framework/issues)
-- [Adapt authoring tool](https://github.com/adaptlearning/adapt-authoring/issues)
 
-If you think you've found a bug, check out our guide on [reporting issues](https://github.com/adaptlearning/adapt_framework/wiki/Bugs-and-features), which will give you more information on verifying your bug, as well as what to report, and where.
-
-If you can fix a bug you've reported, even better! Check out the next section on what to do in that case.
+Before submitting, search existing issues to avoid duplicates. When reporting bugs, include steps to reproduce, expected behaviour, and actual behaviour.
 
 ### Fix issues
 
-If you're looking to get involved as a developer, fixing existing issues is a good place to start.
+If you're a developer, fixing existing issues is a great way to contribute. Check out the issue trackers for bugs labelled with difficulty ratings:
 
-We've written a [guide to contributing code](writing-core-code) which will give you more information on finding a bug to work on, how to go about fixing that bug, and what to do once you've written a patch.
+- `D: beginner` / `D: easy` — Good starting points for newcomers
+- `D: medium` — For developers comfortable with Node.js
+- `D: hard` / `D: insane` — Complex issues requiring deep codebase knowledge
 
-### Contribute code
-
-If you've been working with Adapt for a while, and are comfortable working with the framework on a larger scale, you may want to contribute to a larger feature-request patch (you can filter these in the issues page of the relevant repo), or [write your own module](writing-a-module).
-
-Have a look at our [page dedicated to code contribution](https://github.com/adaptlearning/adapt_framework/wiki/Contributing-code) for more.
+See [Contributing Code](contributing-code) for the complete guide on submitting code changes.
 
 ### Write documentation
 
-If you're a keen writer, we're always looking for more hands to help out writing documentation (no technical knowledge necessary). See our [documentation guide](https://github.com/adaptlearning/adapt_framework/wiki/Writing-documentation) for more.
+Clear documentation helps everyone. If you spot something that could be improved, or want to write new guides, we'd love your help. You don't need to be a developer — just a willingness to explain things clearly.
 
-## 3. Repeat!
+### Help others
 
-Hopefully, you've been bitten by the open-source bug by now and want to contribute more. We always look forward to community contribution, no matter how small :grinning: 
+Share your knowledge in the forums and chat rooms. Answering questions is one of the most valuable contributions you can make.
+
+## Find us on GitHub
+
+- [adapt-security](https://github.com/adapt-security) — Authoring tool repositories
+- [adaptlearning](https://github.com/adaptlearning) — Adapt Framework and community plugins

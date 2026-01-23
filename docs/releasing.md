@@ -34,7 +34,7 @@ Releases follow [semantic versioning](https://semver.org/) (major.minor.patch). 
 | `Breaking:` | Major (x.0.0) | Breaking changes |
 | `Docs:`, `Chore:` | No release | Documentation, maintenance |
 
-See [writing core code](writing-core-code.md) for detailed commit message guidelines.
+See [contributing code](contributing-code) for detailed commit message guidelines.
 
 ### Configuration
 
