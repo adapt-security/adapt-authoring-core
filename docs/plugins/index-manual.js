@@ -230,31 +230,28 @@ export default class Contributors {
 
       return `<div class="contributors-grid">\n${rows}\n</div>
       <style>
-      .contributors-grid {
-        margin: 0 auto;
-        max-width: 600px;
-        padding: 20px 0;
-      }
-
-      .contributors-row {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        margin-bottom: 12px;
-        text-align: center;
-      }
-
-      .contributors-grid a:hover {
-        transform: scale(1.1);
-      }
-
-      .contributor-avatar {
-        object-fit: cover;
-        vertical-align: middle;
-      }
-      </style>`
+.contributors-grid {
+  margin: 0 auto;
+  max-width: 600px;
+  padding: 20px 0;
+}
+.contributors-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.contributors-grid a:hover {
+  transform: scale(1.1);
+}
+.contributor-avatar {
+  object-fit: cover;
+  vertical-align: middle;
+}
+</style>`
     } catch (e) {
       console.error('Failed to generate contributors list:', e)
       return '<p>Unable to load contributors list.</p>'
