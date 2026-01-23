@@ -38,4 +38,10 @@ The Adapt authoring tool is open source and we welcome contributions. You can fi
 - [adapt-security](https://github.com/adapt-security) — Authoring tool repositories
 - [adaptlearning](https://github.com/adaptlearning) — Adapt Framework and community plugins
 
+## Contributors
+
+A huge thank you to everyone who has contributed to the Adapt authoring tool. This project wouldn't be possible without the time and effort of our community.
+
+{{{CONTRIBUTORS}}}
+
 <div class="big-text">Happy coding!</div>
