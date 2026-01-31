@@ -7,7 +7,7 @@ import https from 'https'
 export default class Contributors {
   ICON_SIZE = 55
   BORDER_WIDTH = 3
-  MIN_CONTRIBUTIONS = 25
+  MIN_CONTRIBUTIONS = 1
 
   constructor (app, config, outputDir) {
     this.org = 'adapt-security'
