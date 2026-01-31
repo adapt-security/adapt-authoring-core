@@ -2,7 +2,7 @@
   "module": false,
   "documentation": {
     "enable": true,
-    "manualCover": "docs/index-cover.md",
+    "manualCover": "docs/cover-manual.md",
     "manualIndex": "docs/index-manual.md",
     "sourceIndex": "docs/index-backend.md",
     "manualPages": {
