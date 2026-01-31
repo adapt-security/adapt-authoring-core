@@ -18,7 +18,7 @@ export default class Contributors {
     this.tiers = [
       { name: 'gold', count: 3, border: '#FFD700' },
       { name: 'silver', count: 6, border: '#C0C0C0' },
-      { name: 'bronze', count: 10, border: '#CD7F32' },
+      { name: 'bronze', count: 9, border: '#CD7F32' },
       { name: 'contributor' }
     ]
   }
