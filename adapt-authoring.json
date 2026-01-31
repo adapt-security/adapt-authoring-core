@@ -2,6 +2,7 @@
   "module": false,
   "documentation": {
     "enable": true,
+    "manualCover": "docs/index-cover.md",
     "manualIndex": "docs/index-manual.md",
     "sourceIndex": "docs/index-backend.md",
     "manualPages": {
@@ -21,7 +22,7 @@
     "manualPlugins": [
       "docs/plugins/binscripts.js",
       "docs/plugins/coremodules.js",
-      "docs/plugins/contributors.js",
+      "docs/plugins/index-manual.js",
       "docs/plugins/licensing.js"
     ]
   }
