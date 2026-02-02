@@ -7,6 +7,12 @@
       "type": "boolean",
       "default": true
     },
+    "moduleLoadTimeout": {
+      "description": "Amount of time to wait for a module to load before erroring",
+      "type": "string",
+      "isTime": true,
+      "default": "1m"
+    },
     "dataDir": {
       "description": "Directory for persistant application data",
       "type": "string",
