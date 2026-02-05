@@ -10,7 +10,7 @@
     "moduleLoadTimeout": {
       "description": "Amount of time to wait for a module to load before erroring",
       "type": "string",
-      "isTime": true,
+      "isTimeMs": true,
       "default": "1m"
     },
     "dataDir": {
