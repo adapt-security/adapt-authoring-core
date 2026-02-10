@@ -1,4 +1,4 @@
-import { describe, it, before } from 'node:test'
+import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import AbstractModule from '../lib/AbstractModule.js'
 
@@ -21,9 +21,9 @@ describe('AbstractModule', () => {
       }
       const pkg = { name: 'test-module', rootDir: '/test' }
       const module = new AbstractModule(mockApp, pkg)
-      
+
       await module.onReady().catch(() => {}) // Wait for init
-      
+
       assert.equal(module.app, mockApp)
       assert.equal(module.pkg, pkg)
       assert.equal(module.name, 'test-module')
@@ -40,9 +40,9 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, {})
-      
+
       await module.onReady().catch(() => {})
-      
+
       assert.equal(module.name, 'AbstractModule')
     })
 
@@ -56,9 +56,9 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'test' })
-      
+
       await module.onReady().catch(() => {})
-      
+
       assert.ok(module.readyHook)
       assert.equal(typeof module.readyHook.invoke, 'function')
     })
@@ -75,16 +75,16 @@ describe('AbstractModule', () => {
         }
       }
       let initCalled = false
-      
+
       class TestModule extends AbstractModule {
         async init () {
           initCalled = true
         }
       }
-      
+
       const module = new TestModule(mockApp, { name: 'test' })
       await module.onReady()
-      
+
       assert.equal(initCalled, true)
     })
 
@@ -97,13 +97,13 @@ describe('AbstractModule', () => {
           }
         }
       }
-      
+
       class TestModule extends AbstractModule {
         async init () {
           throw new Error('init error')
         }
       }
-      
+
       const module = new TestModule(mockApp, { name: 'test' })
       await assert.rejects(module.onReady(), { message: 'init error' })
     })
@@ -120,9 +120,9 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'test' })
-      
+
       await module.onReady()
-      
+
       assert.equal(module._isReady, true)
     })
 
@@ -135,21 +135,21 @@ describe('AbstractModule', () => {
           }
         }
       }
-      
+
       class TestModule extends AbstractModule {
         async init () {
           throw new Error('test error')
         }
       }
-      
+
       const module = new TestModule(mockApp, { name: 'test' })
-      
+
       try {
         await module.onReady()
       } catch (e) {
         // Expected
       }
-      
+
       assert.equal(module._isReady, false)
     })
 
@@ -163,9 +163,9 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'test' })
-      
+
       await module.onReady()
-      
+
       assert.equal(typeof module.initTime, 'number')
       assert.ok(module.initTime >= 0)
     })
@@ -180,12 +180,12 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'test' })
-      
+
       await module.onReady()
       const firstInitTime = module.initTime
-      
+
       await module.setReady()
-      
+
       assert.equal(module.initTime, firstInitTime)
     })
   })
@@ -202,7 +202,7 @@ describe('AbstractModule', () => {
       }
       const module = new AbstractModule(mockApp, { name: 'test' })
       const result = module.onReady()
-      
+
       assert.ok(result instanceof Promise)
     })
 
@@ -216,9 +216,9 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'test' })
-      
+
       const resolvedModule = await module.onReady()
-      
+
       assert.equal(resolvedModule, module)
     })
 
@@ -231,15 +231,15 @@ describe('AbstractModule', () => {
           }
         }
       }
-      
+
       class TestModule extends AbstractModule {
         async init () {
           throw new Error('init failed')
         }
       }
-      
+
       const module = new TestModule(mockApp, { name: 'test' })
-      
+
       await assert.rejects(module.onReady(), { message: 'init failed' })
     })
 
@@ -253,11 +253,11 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'test' })
-      
+
       await module.onReady()
-      
+
       const resolvedModule = await module.onReady()
-      
+
       assert.equal(resolvedModule, module)
     })
   })
@@ -273,11 +273,11 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'test-module' })
-      
+
       await module.onReady()
-      
+
       const result = module.getConfig('someKey')
-      
+
       assert.equal(result, undefined)
     })
 
@@ -296,11 +296,11 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'test-module' })
-      
+
       await module.onReady()
-      
+
       const result = module.getConfig('testKey')
-      
+
       assert.equal(result, 'testValue')
     })
 
@@ -319,11 +319,11 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'test-module' })
-      
+
       await module.onReady()
-      
+
       const result = module.getConfig('someKey')
-      
+
       assert.equal(result, undefined)
     })
   })
@@ -339,9 +339,9 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'test' })
-      
+
       await module.onReady()
-      
+
       assert.doesNotThrow(() => {
         module.log('info', 'test message')
       })
@@ -364,11 +364,11 @@ describe('AbstractModule', () => {
         }
       }
       const module = new AbstractModule(mockApp, { name: 'adapt-authoring-test' })
-      
+
       await module.onReady()
-      
+
       module.log('info', 'test message')
-      
+
       assert.equal(loggedMessage.level, 'info')
       assert.equal(loggedMessage.moduleName, 'test')
       assert.deepEqual(loggedMessage.args, ['test message'])
