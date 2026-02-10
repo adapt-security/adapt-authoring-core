@@ -46,7 +46,7 @@ describe('AbstractModule', () => {
       assert.equal(module.name, 'AbstractModule')
     })
 
-    it('should initialize readyHook', async () => {
+    it('should initialize readyHook for lifecycle management', async () => {
       const mockApp = {
         dependencyloader: {
           moduleLoadedHook: {
@@ -59,8 +59,12 @@ describe('AbstractModule', () => {
 
       await module.onReady().catch(() => {})
 
+      // readyHook should be initialized and usable
       assert.ok(module.readyHook)
-      assert.equal(typeof module.readyHook.invoke, 'function')
+      let hookCalled = false
+      module.readyHook.tap(() => { hookCalled = true })
+      await module.readyHook.invoke()
+      assert.equal(hookCalled, true)
     })
   })
 

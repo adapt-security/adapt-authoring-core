@@ -55,7 +55,7 @@ describe('DependencyLoader', () => {
       const mockApp = {
         rootDir: '/test',
         logger: {
-          _isReady: true,
+          _isReady: true, // Note: Mock uses private property to simulate ready state
           log: () => { logged = true }
         }
       }
@@ -70,7 +70,7 @@ describe('DependencyLoader', () => {
       const mockApp = {
         rootDir: '/test',
         logger: {
-          _isReady: false,
+          _isReady: false, // Note: Mock uses private property to check ready state
           log: () => {}
         }
       }
@@ -116,7 +116,7 @@ describe('DependencyLoader', () => {
       const mockApp = {
         rootDir: '/test',
         config: {
-          _isReady: true,
+          _isReady: true, // Note: Mock uses private property to simulate ready state
           get: (key) => {
             if (key === 'adapt-authoring-core.testKey') return 'testValue'
           }

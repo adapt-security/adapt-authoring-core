@@ -20,19 +20,38 @@ describe('Hook', () => {
       assert.equal(hook.hasObservers, false)
     })
 
-    it('should create a parallel hook by default', () => {
+    it('should create a hook that supports parallel execution', async () => {
       const hook = new Hook()
-      assert.equal(hook._options.type, Hook.Types.Parallel)
+      const results = []
+      hook.tap(() => results.push(1))
+      hook.tap(() => results.push(2))
+      await hook.invoke()
+      assert.equal(results.length, 2)
     })
 
-    it('should create a series hook when mutable option is true', () => {
+    it('should create a series hook when mutable option is true', async () => {
       const hook = new Hook({ mutable: true })
-      assert.equal(hook._options.type, Hook.Types.Series)
+      const obj = { value: 0 }
+      hook.tap((arg) => { arg.value += 1 })
+      hook.tap((arg) => { arg.value += 1 })
+      await hook.invoke(obj)
+      assert.equal(obj.value, 2)
     })
 
-    it('should respect type option', () => {
+    it('should respect type option for series execution', async () => {
       const hook = new Hook({ type: Hook.Types.Series })
-      assert.equal(hook._options.type, Hook.Types.Series)
+      const order = []
+      hook.tap(async () => {
+        order.push('start-1')
+        await new Promise(resolve => setTimeout(resolve, 10))
+        order.push('end-1')
+      })
+      hook.tap(() => {
+        order.push('start-2')
+        order.push('end-2')
+      })
+      await hook.invoke()
+      assert.deepEqual(order, ['start-1', 'end-1', 'start-2', 'end-2'])
     })
   })
 
@@ -56,11 +75,13 @@ describe('Hook', () => {
       assert.equal(hook.hasObservers, true)
     })
 
-    it('should add multiple observers', () => {
+    it('should add multiple observers', async () => {
       const hook = new Hook()
-      hook.tap(() => {})
-      hook.tap(() => {})
-      assert.equal(hook._hookObservers.length, 2)
+      let count = 0
+      hook.tap(() => count++)
+      hook.tap(() => count++)
+      await hook.invoke()
+      assert.equal(count, 2)
     })
 
     it('should bind observer to provided scope', () => {

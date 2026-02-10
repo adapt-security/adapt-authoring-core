@@ -3,14 +3,12 @@ import assert from 'node:assert/strict'
 import Utils from '../lib/Utils.js'
 
 describe('App', () => {
-  describe('.metadataFileName', () => {
-    it('should return adapt-authoring.json', () => {
+  describe('structure', () => {
+    it('should use adapt-authoring.json for metadata', () => {
       assert.equal(Utils.metadataFileName, 'adapt-authoring.json')
     })
-  })
 
-  describe('.packageFileName', () => {
-    it('should return package.json', () => {
+    it('should use package.json for package info', () => {
       assert.equal(Utils.packageFileName, 'package.json')
     })
   })
