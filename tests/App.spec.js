@@ -1,39 +1,81 @@
-import { describe, it } from 'node:test'
+import { describe, it, before } from 'node:test'
 import assert from 'node:assert/strict'
-import Utils from '../lib/Utils.js'
+import { tmpdir } from 'node:os'
+import App from '../lib/App.js'
 
 describe('App', () => {
-  describe('structure', () => {
-    it('should use adapt-authoring.json for metadata', () => {
-      assert.equal(Utils.metadataFileName, 'adapt-authoring.json')
+  let app
+
+  before(async () => {
+    app = new App()
+    await app.onReady()
+  })
+
+  describe('.instance', () => {
+    it('should return an App instance', () => {
+      assert.ok(App.instance instanceof App)
     })
 
-    it('should use package.json for package info', () => {
-      assert.equal(Utils.packageFileName, 'package.json')
+    it('should return the same instance on repeated access', () => {
+      assert.equal(App.instance, App.instance)
+    })
+  })
+
+  describe('constructor', () => {
+    it('should set name to adapt-authoring-core', () => {
+      assert.equal(app.name, 'adapt-authoring-core')
+    })
+
+    it('should set rootDir to a non-empty string', () => {
+      assert.equal(typeof app.rootDir, 'string')
+      assert.ok(app.rootDir.length > 0)
+    })
+
+    it('should set git property via getGitInfo', () => {
+      assert.equal(typeof app.git, 'object')
     })
   })
 
   describe('#getGitInfo()', () => {
-    it('should return an object with branch and commit properties or empty object', () => {
-      // Since we can't easily test getGitInfo without a full app instance,
-      // we just verify the structure it should return
-      const mockGitInfo = {
-        branch: 'main',
-        commit: 'abc123'
-      }
+    it('should return branch and commit when .git directory exists', () => {
+      const gitInfo = app.getGitInfo()
+      assert.ok('branch' in gitInfo)
+      assert.ok('commit' in gitInfo)
+      assert.equal(typeof gitInfo.branch, 'string')
+      assert.equal(typeof gitInfo.commit, 'string')
+    })
 
-      assert.equal(typeof mockGitInfo, 'object')
-      assert.ok('branch' in mockGitInfo || Object.keys(mockGitInfo).length === 0)
-      assert.ok('commit' in mockGitInfo || Object.keys(mockGitInfo).length === 0)
+    it('should return an empty object when .git directory is missing', () => {
+      const fakeApp = Object.create(App.prototype)
+      fakeApp.rootDir = tmpdir()
+      assert.deepEqual(fakeApp.getGitInfo(), {})
+    })
+  })
+
+  describe('#get dependencies()', () => {
+    it('should return an object', () => {
+      assert.equal(typeof app.dependencies, 'object')
+    })
+  })
+
+  describe('#start()', () => {
+    it('should throw when app is already ready', async () => {
+      await assert.rejects(app.start())
     })
   })
 
   describe('#waitForModule()', () => {
-    it('should accept module names as arguments', () => {
-      // This is more of a structure test since we can't instantiate App easily
-      const moduleNames = ['adapt-authoring-logger', 'adapt-authoring-config']
-      assert.ok(Array.isArray(moduleNames))
-      assert.ok(moduleNames.every(name => typeof name === 'string'))
+    it('should reject for an unknown module name', async () => {
+      await assert.rejects(app.waitForModule('nonexistent-xyz'), { name: 'Error' })
+    })
+  })
+
+  describe('#setReady()', () => {
+    it('should reset _isStarting to false', async () => {
+      const testApp = new App()
+      testApp._isStarting = true
+      await testApp.setReady()
+      assert.equal(testApp._isStarting, false)
     })
   })
 })
