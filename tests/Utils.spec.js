@@ -36,6 +36,17 @@ describe('Utils', () => {
       })
     })
 
+    const objectLikeButValid = [
+      { value: new Date(), label: 'Date instance' },
+      { value: /regex/, label: 'RegExp instance' }
+    ]
+
+    objectLikeButValid.forEach(({ value, label }) => {
+      it(`should return true for ${label}`, () => {
+        assert.equal(Utils.isObject(value), true)
+      })
+    })
+
     const invalidObjects = [
       { value: null, label: 'null' },
       { value: [], label: 'empty array' },
@@ -44,7 +55,10 @@ describe('Utils', () => {
       { value: 123, label: 'number' },
       { value: true, label: 'boolean' },
       { value: undefined, label: 'undefined' },
-      { value: () => {}, label: 'function' }
+      { value: () => {}, label: 'function' },
+      { value: 0, label: 'zero' },
+      { value: '', label: 'empty string' },
+      { value: NaN, label: 'NaN' }
     ]
 
     invalidObjects.forEach(({ value, label }) => {

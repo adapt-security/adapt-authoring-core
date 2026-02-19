@@ -377,5 +377,99 @@ describe('AbstractModule', () => {
       assert.equal(loggedMessage.moduleName, 'test')
       assert.deepEqual(loggedMessage.args, ['test message'])
     })
+
+    it('should strip adapt-authoring- prefix from module name in log', async () => {
+      let loggedModuleName
+      const mockApp = {
+        logger: {
+          name: 'logger',
+          log: (level, moduleName) => {
+            loggedModuleName = moduleName
+          }
+        },
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, { name: 'adapt-authoring-mymod' })
+
+      await module.onReady()
+
+      module.log('debug', 'hello')
+
+      assert.equal(loggedModuleName, 'mymod')
+    })
+
+    it('should not strip prefix when name does not start with adapt-authoring-', async () => {
+      let loggedModuleName
+      const mockApp = {
+        logger: {
+          name: 'logger',
+          log: (level, moduleName) => {
+            loggedModuleName = moduleName
+          }
+        },
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, { name: 'custom-module' })
+
+      await module.onReady()
+
+      module.log('debug', 'hello')
+
+      assert.equal(loggedModuleName, 'custom-module')
+    })
+
+    it('should pass multiple rest arguments to logger', async () => {
+      let loggedArgs
+      const mockApp = {
+        logger: {
+          name: 'logger',
+          log: (level, moduleName, ...args) => {
+            loggedArgs = args
+          }
+        },
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, { name: 'test' })
+
+      await module.onReady()
+
+      module.log('info', 'arg1', 'arg2', 'arg3')
+
+      assert.deepEqual(loggedArgs, ['arg1', 'arg2', 'arg3'])
+    })
+  })
+
+  describe('constructor with null pkg', () => {
+    it('should use constructor name when pkg is null', async () => {
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, null)
+
+      await module.onReady()
+
+      assert.equal(module.name, 'AbstractModule')
+      assert.equal(module.rootDir, undefined)
+    })
   })
 })

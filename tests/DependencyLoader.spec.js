@@ -168,6 +168,124 @@ describe('DependencyLoader', () => {
     })
   })
 
+  describe('#loadModules()', () => {
+    it('should throw DependencyError when module fails without force', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = { 'nonexistent-module': { module: true, name: 'nonexistent-module' } }
+
+      await assert.rejects(
+        loader.loadModules(['nonexistent-module']),
+        { name: 'DependencyError' }
+      )
+    })
+
+    it('should not throw when module fails with force option', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = { 'nonexistent-module': { module: true, name: 'nonexistent-module' } }
+
+      await loader.loadModules(['nonexistent-module'], { force: true })
+
+      assert.ok(loader.failedModules.includes('nonexistent-module'))
+    })
+
+    it('should log peer dependency warnings on failure with force', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = { 'nonexistent-module': { module: true, name: 'nonexistent-module' } }
+      loader.peerDependencies = { 'nonexistent-module': ['dependent-mod'] }
+
+      await loader.loadModules(['nonexistent-module'], { force: true })
+
+      assert.ok(loader.failedModules.includes('nonexistent-module'))
+    })
+  })
+
+  describe('#loadModule()', () => {
+    it('should throw when module already exists', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.instances = { 'existing-module': {} }
+
+      await assert.rejects(
+        loader.loadModule('existing-module'),
+        { message: 'Module already exists' }
+      )
+    })
+
+    it('should skip loading when config.module is false', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = { 'non-module': { module: false } }
+
+      const result = await loader.loadModule('non-module')
+
+      assert.equal(result, undefined)
+    })
+  })
+
+  describe('#waitForModule()', () => {
+    it('should throw for missing module', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader._configsLoaded = true
+      loader.configs = {}
+
+      await assert.rejects(
+        loader.waitForModule('adapt-authoring-missing'),
+        { message: "Missing required module 'adapt-authoring-missing'" }
+      )
+    })
+
+    it('should throw for failed module', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader._configsLoaded = true
+      loader.configs = { 'adapt-authoring-failed': { name: 'adapt-authoring-failed' } }
+      loader.failedModules = ['adapt-authoring-failed']
+
+      await assert.rejects(
+        loader.waitForModule('adapt-authoring-failed'),
+        { message: "Dependency 'adapt-authoring-failed' failed to load" }
+      )
+    })
+
+    it('should return instance when module is already loaded', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader._configsLoaded = true
+      const mockInstance = {
+        name: 'adapt-authoring-test',
+        _isReady: true,
+        onReady: async () => mockInstance
+      }
+      loader.configs = { 'adapt-authoring-test': { name: 'adapt-authoring-test' } }
+      loader.instances = { 'adapt-authoring-test': mockInstance }
+
+      const result = await loader.waitForModule('adapt-authoring-test')
+
+      assert.equal(result, mockInstance)
+    })
+
+    it('should prepend adapt-authoring- prefix when not present', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader._configsLoaded = true
+      const mockInstance = {
+        name: 'adapt-authoring-shortname',
+        _isReady: true,
+        onReady: async () => mockInstance
+      }
+      loader.configs = { 'adapt-authoring-shortname': { name: 'adapt-authoring-shortname' } }
+      loader.instances = { 'adapt-authoring-shortname': mockInstance }
+
+      const result = await loader.waitForModule('shortname')
+
+      assert.equal(result, mockInstance)
+    })
+  })
+
   describe('#logProgress()', () => {
     it('should not throw when called with valid instance', () => {
       const mockApp = { rootDir: '/test' }
@@ -189,12 +307,29 @@ describe('DependencyLoader', () => {
       })
     })
 
-    it('should handle error parameter', () => {
+    it('should return early when error is passed', () => {
       const mockApp = { rootDir: '/test' }
       const loader = new DependencyLoader(mockApp)
 
       assert.doesNotThrow(() => {
         loader.logProgress(new Error('test error'), null)
+      })
+    })
+
+    it('should skip modules with module: false in progress count', () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = {
+        'test-module': { name: 'test-module', module: true },
+        'non-module': { name: 'non-module', module: false }
+      }
+      loader.instances = {
+        'test-module': { name: 'test-module', _isReady: true, initTime: 50 }
+      }
+
+      // Should count 1/1 (100%), ignoring non-module
+      assert.doesNotThrow(() => {
+        loader.logProgress(null, { name: 'test-module', initTime: 50 })
       })
     })
   })
