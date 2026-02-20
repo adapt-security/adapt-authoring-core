@@ -455,11 +455,6 @@ describe('DependencyLoader', () => {
       assert.equal(result, mockInstance)
     })
 
-    // TODO: Bug - Hook.onInvoke() pushes [resolve, reject] to _hookObservers where
-    // invoke() tries to call it as a function, causing TypeError. The _promiseObservers
-    // array that should handle these promises is never populated. This means
-    // waitForModule() hangs when called before configs are loaded.
-
     it('should resolve via moduleLoadedHook when module not yet loaded', async () => {
       const mockApp = { rootDir: '/test' }
       const loader = new DependencyLoader(mockApp)
