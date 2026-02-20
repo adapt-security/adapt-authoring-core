@@ -343,11 +343,6 @@ describe('Hook', () => {
       })
     })
 
-    // TODO: Bug - onInvoke() pushes a [resolve, reject] array to _hookObservers.
-    // When invoke() runs, it tries to call this array as a function, which throws
-    // TypeError. The promise returned by onInvoke() is never resolved or rejected
-    // because _promiseObservers is never populated. This makes onInvoke() unusable
-    // with invoke() - the onInvoke promise will hang forever.
   })
 
   describe('#onInvoke()', () => {
@@ -357,17 +352,17 @@ describe('Hook', () => {
       assert.ok(result instanceof Promise)
     })
 
-    it('should add an entry to hook observers', () => {
+    it('should add an entry to promise observers', () => {
       const hook = new Hook()
-      assert.equal(hook.hasObservers, false)
+      assert.equal(hook._promiseObservers.length, 0)
       hook.onInvoke()
-      assert.equal(hook.hasObservers, true)
+      assert.equal(hook._promiseObservers.length, 1)
     })
 
-    it('should add a resolve/reject pair as observer', () => {
+    it('should add a resolve/reject pair as promise observer', () => {
       const hook = new Hook()
       hook.onInvoke()
-      const observer = hook._hookObservers[0]
+      const observer = hook._promiseObservers[0]
       assert.ok(Array.isArray(observer))
       assert.equal(observer.length, 2)
     })
