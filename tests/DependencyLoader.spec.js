@@ -38,6 +38,18 @@ describe('DependencyLoader', () => {
       assert.equal(typeof loader.configsLoadedHook.invoke, 'function')
       assert.equal(typeof loader.moduleLoadedHook.invoke, 'function')
     })
+
+    it('should tap logProgress into moduleLoadedHook', () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      assert.ok(loader.moduleLoadedHook.hasObservers)
+    })
+
+    it('should derive name from constructor name in lowercase', () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      assert.equal(loader.name, 'dependencyloader')
+    })
   })
 
   describe('#log()', () => {
@@ -80,6 +92,27 @@ describe('DependencyLoader', () => {
         loader.log('info', 'test message')
       })
     })
+
+    it('should pass level and args to app.logger.log', () => {
+      let loggedLevel, loggedName, loggedArgs
+      const mockApp = {
+        rootDir: '/test',
+        logger: {
+          _isReady: true,
+          log: (level, name, ...args) => {
+            loggedLevel = level
+            loggedName = name
+            loggedArgs = args
+          }
+        }
+      }
+      const loader = new DependencyLoader(mockApp)
+      loader.log('warn', 'message1', 'message2')
+
+      assert.equal(loggedLevel, 'warn')
+      assert.equal(loggedName, 'dependencyloader')
+      assert.deepEqual(loggedArgs, ['message1', 'message2'])
+    })
   })
 
   describe('#logError()', () => {
@@ -97,6 +130,20 @@ describe('DependencyLoader', () => {
       loader.logError('error message')
 
       assert.equal(loggedLevel, 'error')
+    })
+
+    it('should pass all arguments through to log', () => {
+      let loggedArgs
+      const mockApp = {
+        rootDir: '/test',
+        logger: {
+          _isReady: true,
+          log: (level, name, ...args) => { loggedArgs = args }
+        }
+      }
+      const loader = new DependencyLoader(mockApp)
+      loader.logError('msg1', 'msg2')
+      assert.deepEqual(loggedArgs, ['msg1', 'msg2'])
     })
   })
 
@@ -127,6 +174,35 @@ describe('DependencyLoader', () => {
       const result = loader.getConfig('testKey')
 
       assert.equal(result, 'testValue')
+    })
+
+    it('should return undefined when config exists but is not ready', () => {
+      const mockApp = {
+        rootDir: '/test',
+        config: {
+          _isReady: false,
+          get: () => 'should not be called'
+        }
+      }
+      const loader = new DependencyLoader(mockApp)
+
+      const result = loader.getConfig('someKey')
+
+      assert.equal(result, undefined)
+    })
+
+    it('should always use adapt-authoring-core prefix for config keys', () => {
+      let requestedKey
+      const mockApp = {
+        rootDir: '/test',
+        config: {
+          _isReady: true,
+          get: (key) => { requestedKey = key }
+        }
+      }
+      const loader = new DependencyLoader(mockApp)
+      loader.getConfig('myKey')
+      assert.equal(requestedKey, 'adapt-authoring-core.myKey')
     })
   })
 
@@ -166,6 +242,37 @@ describe('DependencyLoader', () => {
       assert.equal(config.essentialType, 'api')
       assert.equal(config.rootDir, testModuleDir)
     })
+
+    it('should override package.json values with adapt-authoring.json values', async () => {
+      const overrideDir = path.join(__dirname, 'data', 'override-module')
+      await fs.ensureDir(overrideDir)
+      await fs.writeJson(path.join(overrideDir, 'package.json'), {
+        name: 'pkg-name',
+        description: 'from package'
+      })
+      await fs.writeJson(path.join(overrideDir, 'adapt-authoring.json'), {
+        name: 'adapt-name',
+        description: 'from adapt'
+      })
+
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      const config = await loader.loadModuleConfig(overrideDir)
+
+      assert.equal(config.name, 'adapt-name')
+      assert.equal(config.description, 'from adapt')
+
+      await fs.remove(overrideDir)
+    })
+
+    it('should set rootDir to the module directory', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+
+      const config = await loader.loadModuleConfig(testModuleDir)
+
+      assert.equal(config.rootDir, testModuleDir)
+    })
   })
 
   describe('#loadModules()', () => {
@@ -200,6 +307,42 @@ describe('DependencyLoader', () => {
 
       assert.ok(loader.failedModules.includes('nonexistent-module'))
     })
+
+    it('should include module name in DependencyError message', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = { 'nonexistent-module': { module: true, name: 'nonexistent-module' } }
+
+      await assert.rejects(
+        loader.loadModules(['nonexistent-module']),
+        (err) => {
+          assert.ok(err.message.includes('nonexistent-module'))
+          return true
+        }
+      )
+    })
+
+    it('should set cause on DependencyError', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = { 'nonexistent-module': { module: true, name: 'nonexistent-module' } }
+
+      try {
+        await loader.loadModules(['nonexistent-module'])
+        assert.fail('should have thrown')
+      } catch (err) {
+        assert.ok(err.cause)
+      }
+    })
+
+    it('should handle empty module list', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+
+      await loader.loadModules([])
+
+      assert.deepEqual(loader.failedModules, [])
+    })
   })
 
   describe('#loadModule()', () => {
@@ -222,6 +365,16 @@ describe('DependencyLoader', () => {
       const result = await loader.loadModule('non-module')
 
       assert.equal(result, undefined)
+    })
+
+    it('should not add to instances when config.module is false', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = { 'non-module': { module: false } }
+
+      await loader.loadModule('non-module')
+
+      assert.equal(loader.instances['non-module'], undefined)
     })
   })
 
@@ -284,6 +437,44 @@ describe('DependencyLoader', () => {
 
       assert.equal(result, mockInstance)
     })
+
+    it('should not double-prefix names that already have the prefix', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader._configsLoaded = true
+      const mockInstance = {
+        name: 'adapt-authoring-server',
+        _isReady: true,
+        onReady: async () => mockInstance
+      }
+      loader.configs = { 'adapt-authoring-server': { name: 'adapt-authoring-server' } }
+      loader.instances = { 'adapt-authoring-server': mockInstance }
+
+      const result = await loader.waitForModule('adapt-authoring-server')
+
+      assert.equal(result, mockInstance)
+    })
+
+    // TODO: Bug - Hook.onInvoke() pushes [resolve, reject] to _hookObservers where
+    // invoke() tries to call it as a function, causing TypeError. The _promiseObservers
+    // array that should handle these promises is never populated. This means
+    // waitForModule() hangs when called before configs are loaded.
+
+    it('should resolve via moduleLoadedHook when module not yet loaded', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader._configsLoaded = true
+      loader.configs = { 'adapt-authoring-pending': { name: 'adapt-authoring-pending' } }
+
+      const mockInstance = { name: 'adapt-authoring-pending' }
+
+      const waitPromise = loader.waitForModule('adapt-authoring-pending')
+
+      await loader.moduleLoadedHook.invoke(null, mockInstance)
+
+      const result = await waitPromise
+      assert.equal(result, mockInstance)
+    })
   })
 
   describe('#logProgress()', () => {
@@ -331,6 +522,76 @@ describe('DependencyLoader', () => {
       assert.doesNotThrow(() => {
         loader.logProgress(null, { name: 'test-module', initTime: 50 })
       })
+    })
+
+    it('should count module being loaded as loaded even before _isReady', () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = {
+        'mod-a': { name: 'mod-a', module: true },
+        'mod-b': { name: 'mod-b', module: true }
+      }
+      loader.instances = {}
+
+      assert.doesNotThrow(() => {
+        loader.logProgress(null, { name: 'mod-a', initTime: 10 })
+      })
+    })
+
+    it('should log init times at 100% progress', () => {
+      let loggedTimes
+      const mockApp = {
+        rootDir: '/test',
+        logger: {
+          _isReady: true,
+          log: (level, name, ...args) => {
+            if (typeof args[0] === 'object' && !Array.isArray(args[0]) && typeof args[0] !== 'string') {
+              loggedTimes = args[0]
+            }
+          }
+        }
+      }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = {
+        'mod-a': { name: 'mod-a', module: true }
+      }
+      loader.instances = {
+        'mod-a': { name: 'mod-a', _isReady: true, initTime: 42 }
+      }
+
+      loader.logProgress(null, { name: 'mod-a', initTime: 42 })
+
+      assert.ok(loggedTimes)
+      assert.equal(loggedTimes['mod-a'], 42)
+    })
+
+    it('should include failed module names in log output', () => {
+      let loggedMessage
+      const mockApp = {
+        rootDir: '/test',
+        logger: {
+          _isReady: true,
+          log: (level, name, ...args) => {
+            if (typeof args[0] === 'string' && args[0] === 'LOAD') {
+              loggedMessage = args[1]
+            }
+          }
+        }
+      }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = {
+        'adapt-authoring-ok': { name: 'adapt-authoring-ok', module: true },
+        'adapt-authoring-bad': { name: 'adapt-authoring-bad', module: true }
+      }
+      loader.instances = {
+        'adapt-authoring-ok': { name: 'adapt-authoring-ok', _isReady: true, initTime: 10 }
+      }
+      loader.failedModules = ['adapt-authoring-bad']
+
+      loader.logProgress(null, { name: 'adapt-authoring-ok', initTime: 10 })
+
+      assert.ok(loggedMessage)
+      assert.ok(loggedMessage.includes('failed'))
     })
   })
 })

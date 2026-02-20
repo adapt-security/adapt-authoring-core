@@ -21,6 +21,16 @@ describe('Utils', () => {
       assert.equal(typeof args, 'object')
       assert.ok(Array.isArray(args.params))
     })
+
+    it('should include the underscore array from minimist', () => {
+      const args = Utils.getArgs()
+      assert.ok(Array.isArray(args._))
+    })
+
+    it('should derive params by slicing first two entries from _', () => {
+      const args = Utils.getArgs()
+      assert.deepEqual(args.params, args._.slice(2))
+    })
   })
 
   describe('.isObject()', () => {

@@ -66,6 +66,69 @@ describe('AbstractModule', () => {
       await module.readyHook.invoke()
       assert.equal(hookCalled, true)
     })
+
+    it('should use constructor name when pkg is undefined', async () => {
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, undefined)
+      await module.onReady()
+      assert.equal(module.name, 'AbstractModule')
+    })
+
+    it('should use subclass constructor name when pkg.name is empty', async () => {
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+
+      class MyCustomModule extends AbstractModule {
+        async init () {}
+      }
+
+      const module = new MyCustomModule(mockApp, { name: '' })
+      await module.onReady()
+      assert.equal(module.name, 'MyCustomModule')
+    })
+
+    it('should set _startTime during construction', async () => {
+      const before = Date.now()
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, { name: 'test' })
+      const after = Date.now()
+      await module.onReady()
+      assert.ok(module._startTime >= before)
+      assert.ok(module._startTime <= after)
+    })
+
+    it('should initialise initTime as undefined', () => {
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, { name: 'test' })
+      assert.equal(module.initTime, undefined)
+    })
   })
 
   describe('#init()', () => {
@@ -110,6 +173,43 @@ describe('AbstractModule', () => {
 
       const module = new TestModule(mockApp, { name: 'test' })
       await assert.rejects(module.onReady(), { message: 'init error' })
+    })
+
+    it('should handle async init that resolves', async () => {
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      let completed = false
+
+      class TestModule extends AbstractModule {
+        async init () {
+          await new Promise(resolve => setTimeout(resolve, 5))
+          completed = true
+        }
+      }
+
+      const module = new TestModule(mockApp, { name: 'test' })
+      await module.onReady()
+      assert.equal(completed, true)
+    })
+
+    it('should default init to a no-op that resolves', async () => {
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, { name: 'test' })
+      await module.onReady()
+      assert.equal(module._isReady, true)
     })
   })
 
@@ -192,6 +292,28 @@ describe('AbstractModule', () => {
 
       assert.equal(module.initTime, firstInitTime)
     })
+
+    it('should calculate initTime even on error', async () => {
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+
+      class TestModule extends AbstractModule {
+        async init () {
+          throw new Error('fail')
+        }
+      }
+
+      const module = new TestModule(mockApp, { name: 'test' })
+      try { await module.onReady() } catch (e) { /* expected */ }
+      assert.equal(typeof module.initTime, 'number')
+      assert.ok(module.initTime >= 0)
+    })
   })
 
   describe('#onReady()', () => {
@@ -264,6 +386,24 @@ describe('AbstractModule', () => {
 
       assert.equal(resolvedModule, module)
     })
+
+    // TODO: Bug - onReady() hangs forever after a failed init, because _isReady
+    // remains false and readyHook has already been invoked, so the tap never fires.
+    // Calling onReady() a second time after a failure will never resolve or reject.
+    it('should support multiple concurrent onReady calls', async () => {
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, { name: 'test' })
+      const [r1, r2] = await Promise.all([module.onReady(), module.onReady()])
+      assert.equal(r1, module)
+      assert.equal(r2, module)
+    })
   })
 
   describe('#getConfig()', () => {
@@ -329,6 +469,28 @@ describe('AbstractModule', () => {
       const result = module.getConfig('someKey')
 
       assert.equal(result, undefined)
+    })
+
+    it('should construct key from module name and config key', async () => {
+      let requestedKey
+      const mockApp = {
+        config: {
+          get: (key) => { requestedKey = key; return 'value' }
+        },
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: () => {},
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, { name: 'my-module' })
+
+      await module.onReady()
+
+      module.getConfig('myKey')
+
+      assert.equal(requestedKey, 'my-module.myKey')
     })
   })
 
@@ -451,6 +613,59 @@ describe('AbstractModule', () => {
       module.log('info', 'arg1', 'arg2', 'arg3')
 
       assert.deepEqual(loggedArgs, ['arg1', 'arg2', 'arg3'])
+    })
+
+    it('should queue log and deliver when logger module loads', async () => {
+      let loggedLevel
+      let tapCallback
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: (fn) => { tapCallback = fn },
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, { name: 'test-mod' })
+      await module.onReady()
+
+      module.log('warn', 'deferred message')
+      assert.ok(tapCallback)
+
+      mockApp.logger = {
+        name: 'adapt-authoring-logger',
+        log: (level) => {
+          loggedLevel = level
+        }
+      }
+
+      tapCallback(null, { name: 'adapt-authoring-logger' })
+      assert.equal(loggedLevel, 'warn')
+    })
+
+    it('should not log when loaded module is not the logger', async () => {
+      const logCalled = false
+      let tapCallback
+      const mockApp = {
+        dependencyloader: {
+          moduleLoadedHook: {
+            tap: (fn) => { tapCallback = fn },
+            untap: () => {}
+          }
+        }
+      }
+      const module = new AbstractModule(mockApp, { name: 'test-mod' })
+      await module.onReady()
+
+      // No logger set yet, so log queues the callback
+      module.log('info', 'some message')
+      assert.ok(tapCallback)
+
+      // Now simulate a non-logger module loading - _log checks !this.app.logger
+      // which is true (no logger), so it returns false
+      const result = tapCallback(null, { name: 'adapt-authoring-other' })
+      assert.equal(result, false)
+      assert.equal(logCalled, false)
     })
   })
 

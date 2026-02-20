@@ -13,11 +13,45 @@ describe('Hook', () => {
     })
   })
 
+  describe('.Types', () => {
+    it('should have exactly two type keys', () => {
+      assert.equal(Object.keys(Hook.Types).length, 2)
+    })
+  })
+
   describe('constructor', () => {
     it('should create a hook with default options', () => {
       const hook = new Hook()
       assert.ok(hook instanceof Hook)
       assert.equal(hook.hasObservers, false)
+    })
+
+    it('should default to parallel type', () => {
+      const hook = new Hook()
+      assert.equal(hook._options.type, Hook.Types.Parallel)
+    })
+
+    it('should default mutable to false', () => {
+      const hook = new Hook()
+      assert.equal(hook._options.mutable, false)
+    })
+
+    it('should allow explicit type override even when mutable is true', () => {
+      const hook = new Hook({ type: Hook.Types.Parallel, mutable: true })
+      // When type is explicitly provided, it overrides the mutable-forced series default
+      assert.equal(hook._options.type, Hook.Types.Parallel)
+    })
+
+    it('should handle undefined options', () => {
+      const hook = new Hook(undefined)
+      assert.equal(hook._options.type, Hook.Types.Parallel)
+      assert.equal(hook._options.mutable, false)
+    })
+
+    it('should initialise with empty observer arrays', () => {
+      const hook = new Hook()
+      assert.deepEqual(hook._hookObservers, [])
+      assert.deepEqual(hook._promiseObservers, [])
     })
 
     it('should create a hook that supports parallel execution', async () => {
@@ -100,7 +134,18 @@ describe('Hook', () => {
       hook.tap('not a function')
       hook.tap(null)
       hook.tap(42)
+      hook.tap(undefined)
+      hook.tap({})
+      hook.tap([])
       assert.equal(hook.hasObservers, false)
+    })
+
+    it('should work without scope argument', async () => {
+      const hook = new Hook()
+      let called = false
+      hook.tap(() => { called = true })
+      await hook.invoke()
+      assert.equal(called, true)
     })
   })
 
@@ -121,6 +166,23 @@ describe('Hook', () => {
       hook.untap(fn)
       // observer still present because tap binds the function
       assert.equal(hook.hasObservers, true)
+    })
+
+    it('should remove a directly-pushed observer by reference', () => {
+      const hook = new Hook()
+      const fn = () => {}
+      hook._hookObservers.push(fn)
+      assert.equal(hook.hasObservers, true)
+      hook.untap(fn)
+      assert.equal(hook.hasObservers, false)
+    })
+
+    it('should only remove the first matching reference', () => {
+      const hook = new Hook()
+      const fn = () => {}
+      hook._hookObservers.push(fn, fn)
+      hook.untap(fn)
+      assert.equal(hook._hookObservers.length, 1)
     })
   })
 
@@ -187,6 +249,14 @@ describe('Hook', () => {
         const result = await hook.invoke()
         assert.deepEqual(result, [])
       })
+
+      it('should handle mixed sync and async observers', async () => {
+        const hook = new Hook()
+        hook.tap(() => 'sync')
+        hook.tap(async () => 'async')
+        const result = await hook.invoke()
+        assert.deepEqual(result, ['sync', 'async'])
+      })
     })
 
     describe('series hooks', () => {
@@ -228,6 +298,28 @@ describe('Hook', () => {
         hook.tap(() => { throw new Error('series error') })
         await assert.rejects(hook.invoke(), { message: 'series error' })
       })
+
+      it('should stop on first error and not call subsequent observers', async () => {
+        const hook = new Hook({ type: Hook.Types.Series })
+        const calls = []
+        hook.tap(() => { calls.push(1); throw new Error('stop') })
+        hook.tap(() => calls.push(2))
+        await assert.rejects(hook.invoke())
+        assert.deepEqual(calls, [1])
+      })
+
+      it('should return undefined with no observers', async () => {
+        const hook = new Hook({ type: Hook.Types.Series })
+        const result = await hook.invoke()
+        assert.equal(result, undefined)
+      })
+
+      it('should return single observer result', async () => {
+        const hook = new Hook({ type: Hook.Types.Series })
+        hook.tap(() => 'only')
+        const result = await hook.invoke()
+        assert.equal(result, 'only')
+      })
     })
 
     describe('mutable hooks', () => {
@@ -239,7 +331,23 @@ describe('Hook', () => {
         await hook.invoke(obj)
         assert.equal(obj.value, 3)
       })
+
+      it('should allow multiple mutations in sequence', async () => {
+        const hook = new Hook({ mutable: true })
+        const arr = []
+        hook.tap((a) => { a.push(1) })
+        hook.tap((a) => { a.push(2) })
+        hook.tap((a) => { a.push(3) })
+        await hook.invoke(arr)
+        assert.deepEqual(arr, [1, 2, 3])
+      })
     })
+
+    // TODO: Bug - onInvoke() pushes a [resolve, reject] array to _hookObservers.
+    // When invoke() runs, it tries to call this array as a function, which throws
+    // TypeError. The promise returned by onInvoke() is never resolved or rejected
+    // because _promiseObservers is never populated. This makes onInvoke() unusable
+    // with invoke() - the onInvoke promise will hang forever.
   })
 
   describe('#onInvoke()', () => {
@@ -254,6 +362,14 @@ describe('Hook', () => {
       assert.equal(hook.hasObservers, false)
       hook.onInvoke()
       assert.equal(hook.hasObservers, true)
+    })
+
+    it('should add a resolve/reject pair as observer', () => {
+      const hook = new Hook()
+      hook.onInvoke()
+      const observer = hook._hookObservers[0]
+      assert.ok(Array.isArray(observer))
+      assert.equal(observer.length, 2)
     })
   })
 })
