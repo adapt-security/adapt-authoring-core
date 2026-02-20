@@ -342,7 +342,6 @@ describe('Hook', () => {
         assert.deepEqual(arr, [1, 2, 3])
       })
     })
-
   })
 
   describe('#onInvoke()', () => {
