@@ -35,4 +35,8 @@ describe('toBoolean()', () => {
   it('should return undefined for undefined', () => {
     assert.equal(toBoolean(undefined), undefined)
   })
+
+  it('should return false for a non-"true" string', () => {
+    assert.equal(toBoolean('yes'), false)
+  })
 })

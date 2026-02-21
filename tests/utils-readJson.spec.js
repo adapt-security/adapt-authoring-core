@@ -19,6 +19,18 @@ describe('readJson()', () => {
     }
   })
 
+  it('should handle nested JSON structures', async () => {
+    const tmpFile = path.join(os.tmpdir(), `readJson-nested-${Date.now()}.json`)
+    const data = { a: { b: [1, 2, 3] } }
+    await fs.writeFile(tmpFile, JSON.stringify(data))
+    try {
+      const result = await readJson(tmpFile)
+      assert.deepEqual(result, data)
+    } finally {
+      await fs.unlink(tmpFile)
+    }
+  })
+
   it('should throw on non-existent file', async () => {
     await assert.rejects(
       () => readJson('/tmp/does-not-exist-readjson.json'),

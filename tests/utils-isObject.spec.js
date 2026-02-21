@@ -1,36 +1,7 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { metadataFileName, packageFileName, getArgs, isObject } from '../lib/Utils.js'
 
-describe('metadataFileName', () => {
-  it('should return the metadata file name', () => {
-    assert.equal(metadataFileName, 'adapt-authoring.json')
-  })
-})
-
-describe('packageFileName', () => {
-  it('should return the package file name', () => {
-    assert.equal(packageFileName, 'package.json')
-  })
-})
-
-describe('getArgs()', () => {
-  it('should return an object with parsed arguments', () => {
-    const args = getArgs()
-    assert.equal(typeof args, 'object')
-    assert.ok(Array.isArray(args.params))
-  })
-
-  it('should include the underscore array from minimist', () => {
-    const args = getArgs()
-    assert.ok(Array.isArray(args._))
-  })
-
-  it('should derive params by slicing first two entries from _', () => {
-    const args = getArgs()
-    assert.deepEqual(args.params, args._.slice(2))
-  })
-})
+import { isObject } from '../lib/utils/isObject.js'
 
 describe('isObject()', () => {
   const validObjects = [
