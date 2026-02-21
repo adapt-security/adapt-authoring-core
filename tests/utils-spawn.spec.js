@@ -1,22 +1,19 @@
-import { describe, it, before, mock } from 'node:test'
+import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import App from '../lib/App.js'
 
-// Mock App.instance before importing spawn
-before(() => {
-  mock.getter(App, 'instance', () => ({
-    log () {},
-    errors: {
-      SPAWN: {
-        setData (data) {
-          const e = new Error('SPAWN')
-          e.data = data
-          return e
-        }
+mock.getter(App, 'instance', () => ({
+  log () {},
+  errors: {
+    SPAWN: {
+      setData (data) {
+        const e = new Error('SPAWN')
+        e.data = data
+        return e
       }
     }
-  }))
-})
+  }
+}))
 
 const { spawn } = await import('../lib/utils/spawn.js')
 
