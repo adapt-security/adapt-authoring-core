@@ -10,8 +10,11 @@ export default class CoreModules {
   generateMd () {
     return Object.keys(this.app.dependencies).sort().reduce((s, name) => {
       const { version, description, homepage } = this.app.dependencies[name]
-      const badge = homepage ? `[![Tests](${homepage}/actions/workflows/tests.yml/badge.svg)](${homepage}/actions/workflows/tests.yml)` : ''
-      return `${s}\n| ${homepage ? `[${name}](${homepage})` : name} | ${version} | ${description} | ${badge} |`
-    }, '| Name | Version | Description | Tests |\n| - | :-: | - | :-: |')
+      const workflows = ['tests', 'standardjs']
+      const badges = homepage
+        ? workflows.map(w => `[![${w}](${homepage}/actions/workflows/${w}.yml/badge.svg)](${homepage}/actions/workflows/${w}.yml)`).join('<br>')
+        : ''
+      return `${s}\n| ${homepage ? `[${name}](${homepage})` : name} | ${version} | ${description} | ${badges} |`
+    }, '| Name | Version | Description | Status |\n| - | :-: | - | :-: |')
   }
 }
