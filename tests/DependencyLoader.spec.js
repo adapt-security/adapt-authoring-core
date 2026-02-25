@@ -206,6 +206,39 @@ describe('DependencyLoader', () => {
     })
   })
 
+  describe('#loadConfigs()', () => {
+    let testRootDir
+
+    before(async () => {
+      testRootDir = path.join(__dirname, 'data', 'loadconfigs-root')
+      // create mock node_modules with core and modules that sort before it alphabetically
+      const authDir = path.join(testRootDir, 'node_modules', 'adapt-authoring-auth')
+      const configDir = path.join(testRootDir, 'node_modules', 'adapt-authoring-config')
+      const coreDir = path.join(testRootDir, 'node_modules', 'adapt-authoring-core')
+      await fs.ensureDir(authDir)
+      await fs.ensureDir(configDir)
+      await fs.ensureDir(coreDir)
+      await fs.writeJson(path.join(authDir, 'package.json'), { name: 'adapt-authoring-auth' })
+      await fs.writeJson(path.join(authDir, 'adapt-authoring.json'), { module: true })
+      await fs.writeJson(path.join(configDir, 'package.json'), { name: 'adapt-authoring-config' })
+      await fs.writeJson(path.join(configDir, 'adapt-authoring.json'), { module: true })
+      await fs.writeJson(path.join(coreDir, 'package.json'), { name: 'adapt-authoring-core' })
+      await fs.writeJson(path.join(coreDir, 'adapt-authoring.json'), { module: false })
+    })
+
+    after(async () => {
+      await fs.remove(testRootDir)
+    })
+
+    it('should load core config first', async () => {
+      const mockApp = { rootDir: testRootDir, name: 'adapt-authoring-core' }
+      const loader = new DependencyLoader(mockApp)
+      await loader.loadConfigs()
+      const names = Object.keys(loader.configs)
+      assert.equal(names[0], 'adapt-authoring-core')
+    })
+  })
+
   describe('#loadModuleConfig()', () => {
     let testModuleDir
 
