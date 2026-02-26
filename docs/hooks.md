@@ -12,7 +12,7 @@ All hook observers must complete before the operation continues. For example, a 
 
 Hooks can be either **mutable** or **immutable**:
 
-- **Immutable**: the _default_ behaviour, observers receive a deep copy of any arguments to ensure that the original data is read-only and prevent unintended modifications. By default, observers are run in parallel (at the same time).
+- **Immutable**: the _default_ behaviour. Observers are run in parallel (at the same time). When running in series, observers receive a deep copy of arguments to prevent unintended modifications.
 - **Mutable**: hooks allow modification of param data, and run observers in series (one after another) to ensure modifications are applied in order.
 
 ## Basic usage
@@ -119,8 +119,8 @@ Below are some commonly used hooks, which you may find useful.
 | AbstractApiModule | `accessCheckHook` | Check document access | `(req, doc)` | No |
 | AdaptFrameworkBuild | `preBuildHook` | Before course build starts | | Yes |
 | AdaptFrameworkBuild | `postBuildHook` | After course build completes | | Yes |
-| AdaptFrameworkImport | `preImportHook` | Before course import starts | | No |
-| AdaptFrameworkImport | `postImportHook` | After course import completes | | No |
+| AdaptFrameworkModule | `preImportHook` | Before course import starts | | Yes |
+| AdaptFrameworkModule | `postImportHook` | After course import completes | | No |
 
 ## Practical examples
 

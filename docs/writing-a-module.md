@@ -23,21 +23,19 @@ The below is what we recommend, and is the approach taken by the the core dev te
 | `conf` | Folder | All config files go here (in `.schema.json` format) |
 | `docs` | Folder | Documentation files go here (in `.md` format) |
 | `lib` | Folder | All `.js` code should go here |
-| `test` | Folder | Test scripts go here (in `*.spec.js`) |
+| `tests` | Folder | Test scripts go here (in `*.spec.js`) |
 | `index.js` | File | Contains all of the exports for your module |
 | `adapt-authoring.json` | File | Adapt-specific metadata file used when initialising the app |
 | `package.json` | File | npm configuration file |
+| `routes.json` | File | _(Optional)_ Declarative route definitions for modules that expose HTTP endpoints. See [Handling server requests](server-requests.md) and [Authentication and permissions](auth-permissions.md) for details. |
 
 ##### A note on exports:
-If your module needs to export more than just your main module class, you must make sure your module class uses the key `Module` in order to be loaded by DependencyLoader. For example:
+Your module class must be the **default export** — this is what `DependencyLoader` imports. For additional exports, use named exports:
 
-```
-export default {
-  Module: MyModuleClass,
-  utils: MyUtilsClass,
-  // ...other exports
-};
-
+```javascript
+// index.js
+export { default } from './lib/MyModule.js'
+export { MyUtilsClass } from './lib/utils.js'
 ```
 
 ## 2. Set up your package.json
@@ -81,7 +79,7 @@ If you need to wait for another module to initialise before you can continue, th
 See below for an example:
 
 ```javascript
-const { AbstractModule } = require('adapt-authoring-core');
+import { AbstractModule } from 'adapt-authoring-core'
 
 export default class MyModule extends AbstractModule {
   /** @override */

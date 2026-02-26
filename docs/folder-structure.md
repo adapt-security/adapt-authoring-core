@@ -80,7 +80,7 @@ Command-line tools are found in the `bin` folder. Modules can also provide their
 
 ## `docs`
 
-The `doc` folder contains documentation pages. These are picked up and compiled by the documentation generation tools when running `at-docgen`. See the [Building the docs](building-docs) for details.
+The `docs` folder contains documentation pages. These are picked up and compiled by the documentation generation tools when running `at-docgen`. See the [Building the docs](building-docs) for details.
 
 ## `conf`
 

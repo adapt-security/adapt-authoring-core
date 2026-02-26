@@ -88,51 +88,51 @@ We use [semantic-release](https://semantic-release.gitbook.io/) to automate rele
 | Prefix | Release type | Use for |
 |--------|--------------|---------|
 | `Fix:` | Patch (0.0.x) | Bug fixes |
-| `Update:` | Minor (0.x.0) | New features, backwards-compatible changes |
+| `Update:` | Minor (0.x.0) | Backwards-compatible enhancements to existing features |
+| `New:` | Minor (0.x.0) | New features |
 | `Breaking:` | Major (x.0.0) | Breaking changes |
 | `Docs:` | No release | Documentation only |
-| `Chore:` | No release | Maintenance, refactoring |
+| `Build:` | No release | Build process changes |
+| `Upgrade:` | Varies | Dependency upgrades |
+| `Chore:` | No release | Maintenance, refactoring, tests |
 
 ### Format
 
 ```
-Prefix: Short description
+Prefix: Short description (fixes #1234)
+```
+
+Use `(fixes #1234)` when the commit fully resolves an issue, or `(refs #1234)` for partial progress. Keep the first line under 72 characters.
+
+Add a longer explanation on subsequent lines if needed:
+
+```
+Prefix: Short description (fixes #1234)
 
 Longer explanation if needed. Wrap at 72 characters.
-
-Closes #1234
 ```
 
 ### Examples
 
 ```
-Fix: Prevent crash when uploading empty file
-
-The upload handler now validates file size before processing,
-returning a 400 error for empty files.
-
-Closes #1234
+Fix: Prevent crash when uploading empty file (fixes #1234)
 ```
 
 ```
-Update: Add bulk delete endpoint for assets
-
-Closes #5678
+Update: Add bulk delete endpoint for assets (fixes #5678)
 ```
 
 ```
-Breaking: Remove deprecated /api/v1 endpoints
+Breaking: Remove deprecated /api/v1 endpoints (fixes #9012)
 
 The v1 API has been removed. All clients should migrate to /api.
-
-Closes #9012
 ```
 
 ### Tips
 
 - Use the imperative mood ("Add feature" not "Added feature")
 - Keep the first line under 72 characters
-- Reference the issue number with `Closes #1234` to auto-close it when merged
+- Reference the issue in the first line with `(fixes #N)` or `(refs #N)`
 - For breaking changes, explain what users need to do to migrate
 
 ## Submitting a pull request

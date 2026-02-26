@@ -164,7 +164,7 @@ const fixtures = JSON.parse(readFileSync(join(__dirname, 'data', 'fixtures.json'
 
 ```json
 "scripts": {
-  "test": "node --test tests/"
+  "test": "node --test 'tests/*.spec.js'"
 }
 ```
 
