@@ -14,9 +14,10 @@ export default class CoreModules {
     const workflows = ['tests', 'standardjs']
     const results = await Promise.all(workflows.map(async w => {
       const url = `${homepage}/actions/workflows/${w}.yml`
+      const badgeUrl = `${url}/badge.svg`
       try {
-        const res = await fetch(url, { method: 'HEAD', redirect: 'follow' })
-        if (res.ok) return `[![${w}](${url}/badge.svg)](${url})`
+        const res = await fetch(badgeUrl, { method: 'HEAD' })
+        if (res.ok) return `[![${w}](${badgeUrl})](${url})`
       } catch {}
       return null
     }))
