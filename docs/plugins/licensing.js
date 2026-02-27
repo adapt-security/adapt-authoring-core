@@ -40,6 +40,10 @@ export default class Licensing {
 
   async storeLicenseData (pkg) {
     if (!pkg.license) {
+      const l = 'Undefined'
+      if (!this.licenses[l]) this.licenses[l] = { count: 0, packages: [] }
+      this.licenses[l].count++
+      this.licenses[l].packages.push(pkg.name)
       return
     }
     if (typeof pkg.license === 'object') {
@@ -49,14 +53,17 @@ export default class Licensing {
     for (let l of licenses) {
       l = this.licenseNameMap(l)
       if (this.licenses[l]) {
-        return this.licenses[l].count++
+        this.licenses[l].count++
+        this.licenses[l].packages.push(pkg.name)
+        return
       }
-      this.licenses[l] = { count: 1 }
+      this.licenses[l] = { count: 1, packages: [pkg.name] }
       try {
         const { GITHUB_USER, GITHUB_TOKEN } = process.env
         const res = await fetch(`https://api.github.com/licenses/${l.toLowerCase()}`, { headers: { Authorization: `Basic ${Buffer.from(`${GITHUB_USER}:${GITHUB_TOKEN}`).toString('base64')}` } })
-        if (res.status === 200) Object.assign(this.licenses[l], await res.json())
-        if (res.status > 299) console.error(`Failed to fetch '${l}' license: (${res.status}) ${(await res.json()).message}`)
+        const body = await res.json()
+        if (res.ok) Object.assign(this.licenses[l], body)
+        else console.log(`Could not fetch '${l}' license from GitHub API (${res.status}), will list as unknown`)
       } catch (e) {
         console.error(e)
       }
@@ -92,10 +99,10 @@ export default class Licensing {
 
   async generateLicenseDetailsMd () {
     let md = ''
-    Object.entries(this.licenses).forEach(([key, { name, spdxId, description, body, permissions }]) => {
+    Object.entries(this.licenses).forEach(([key, { name, spdx_id: spdxId, description, body, permissions }]) => {
       if (!name) return
       md += '<details>\n'
-      md += `<summary>${name} (${spdxId})</summary>\n`
+      md += `<summary>${name}${spdxId ? ` (${spdxId})` : ''}</summary>\n`
       md += `<p>${description}</p>\n`
       md += `<p>This license allows the following:\n<ul>${permissions.map(p => `<li>${this.permissionsMap(p)}</li>`).join('\n')}</ul></p>\n`
       md += '<p>The original license text is as follows:</p>\n'
@@ -106,11 +113,13 @@ export default class Licensing {
   }
 
   generateUnknownLicenseMd () {
-    const unknowns = []
-    Object.entries(this.licenses).forEach(([key, { name }]) => !name && unknowns.push(key))
-    if (unknowns.length) {
-      return `No information is held on the following licenses, please do your own research to dermine their suitability.\n\n${unknowns.map(u => `- ${u}`).join('\n')}\n`
-    }
+    const unknowns = Object.entries(this.licenses).filter(([, { name }]) => !name)
+    if (!unknowns.length) return ''
+    let md = 'No information is held on the following licenses, please do your own research to determine their suitability.\n\n'
+    unknowns.forEach(([key, { packages }]) => {
+      md += `- **${key}**: ${packages.join(', ')}\n`
+    })
+    return md
   }
 
   async generateMd () {
