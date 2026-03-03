@@ -11,11 +11,13 @@ describe('Hook', () => {
     it('should expose Series type', () => {
       assert.equal(Hook.Types.Series, 'series')
     })
-  })
 
-  describe('.Types', () => {
-    it('should have exactly two type keys', () => {
-      assert.equal(Object.keys(Hook.Types).length, 2)
+    it('should expose Middleware type', () => {
+      assert.equal(Hook.Types.Middleware, 'middleware')
+    })
+
+    it('should have exactly three type keys', () => {
+      assert.equal(Object.keys(Hook.Types).length, 3)
     })
   })
 
@@ -340,6 +342,146 @@ describe('Hook', () => {
         hook.tap((a) => { a.push(3) })
         await hook.invoke(arr)
         assert.deepEqual(arr, [1, 2, 3])
+      })
+    })
+
+    describe('middleware hooks', () => {
+      it('should call the core function when no observers', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        let called = false
+        const core = async () => { called = true; return 'result' }
+        const result = await hook.invoke(core)
+        assert.equal(called, true)
+        assert.equal(result, 'result')
+      })
+
+      it('should pass arguments through to the core function', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        let receivedArgs
+        const core = async (...args) => { receivedArgs = args }
+        await hook.invoke(core, 'a', 'b', 'c')
+        assert.deepEqual(receivedArgs, ['a', 'b', 'c'])
+      })
+
+      it('should wrap the core function with a single observer', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        const order = []
+        hook.tap(async (next, arg) => {
+          order.push('before')
+          const result = await next(arg)
+          order.push('after')
+          return result
+        })
+        const core = async (arg) => { order.push('core'); return arg }
+        await hook.invoke(core, 'data')
+        assert.deepEqual(order, ['before', 'core', 'after'])
+      })
+
+      it('should return the core function result through the chain', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap(async (next, val) => next(val))
+        const core = async (val) => val * 2
+        const result = await hook.invoke(core, 5)
+        assert.equal(result, 10)
+      })
+
+      it('should execute multiple observers in order', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        const order = []
+        hook.tap(async (next, arg) => {
+          order.push('outer-before')
+          const result = await next(arg)
+          order.push('outer-after')
+          return result
+        })
+        hook.tap(async (next, arg) => {
+          order.push('inner-before')
+          const result = await next(arg)
+          order.push('inner-after')
+          return result
+        })
+        const core = async () => { order.push('core') }
+        await hook.invoke(core)
+        assert.deepEqual(order, ['outer-before', 'inner-before', 'core', 'inner-after', 'outer-after'])
+      })
+
+      it('should allow observers to modify arguments before core', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap(async (next, data) => next({ ...data, extra: true }))
+        let received
+        const core = async (data) => { received = data; return data }
+        await hook.invoke(core, { original: true })
+        assert.deepEqual(received, { original: true, extra: true })
+      })
+
+      it('should allow observers to modify the return value after core', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap(async (next, val) => {
+          const result = await next(val)
+          return result + ' modified'
+        })
+        const core = async (val) => val
+        const result = await hook.invoke(core, 'original')
+        assert.equal(result, 'original modified')
+      })
+
+      it('should allow an observer to short-circuit without calling next', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        let coreCalled = false
+        hook.tap(async () => 'blocked')
+        const core = async () => { coreCalled = true; return 'core' }
+        const result = await hook.invoke(core)
+        assert.equal(coreCalled, false)
+        assert.equal(result, 'blocked')
+      })
+
+      it('should propagate errors from the core function', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap(async (next) => next())
+        const core = async () => { throw new Error('core error') }
+        await assert.rejects(hook.invoke(core), { message: 'core error' })
+      })
+
+      it('should propagate errors from observers', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap(async () => { throw new Error('observer error') })
+        const core = async () => 'ok'
+        await assert.rejects(hook.invoke(core), { message: 'observer error' })
+      })
+
+      it('should allow observer to catch and handle core errors', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap(async (next) => {
+          try {
+            return await next()
+          } catch {
+            return 'recovered'
+          }
+        })
+        const core = async () => { throw new Error('fail') }
+        const result = await hook.invoke(core)
+        assert.equal(result, 'recovered')
+      })
+
+      it('should support shared state between before and after phases', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap(async (next, data) => {
+          const snapshot = { ...data }
+          const result = await next(data)
+          return { result, snapshot }
+        })
+        const core = async (data) => { data.mutated = true; return data }
+        const output = await hook.invoke(core, { value: 1 })
+        assert.deepEqual(output.snapshot, { value: 1 })
+        assert.equal(output.result.mutated, true)
+      })
+
+      it('should handle sync observers', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap((next, val) => next(val))
+        const core = (val) => val + 1
+        const result = await hook.invoke(core, 1)
+        assert.equal(result, 2)
       })
     })
   })
