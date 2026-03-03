@@ -8,12 +8,13 @@ A hook is a point in the code where external observers can run their own functio
 
 All hook observers must complete before the operation continues. For example, a document won't be inserted until all `preInsertHook` observers have finished executing.
 
-### Mutable vs. non-mutable
+### Hook types
 
-Hooks can be either **mutable** or **immutable**:
+Hooks support three execution types:
 
-- **Immutable**: the _default_ behaviour. Observers are run in parallel (at the same time). When running in series, observers receive a deep copy of arguments to prevent unintended modifications.
-- **Mutable**: hooks allow modification of param data, and run observers in series (one after another) to ensure modifications are applied in order.
+- **Parallel** (default): observers run at the same time. Observers receive a deep copy of arguments to prevent unintended modifications.
+- **Series**: observers run one after another. When `mutable: true` is set, observers can modify shared arguments in place.
+- **Middleware**: observers wrap a core function using a `next()` pattern (like Express middleware). Each observer receives `(next, ...args)` and must call `next(...args)` to continue the chain. This allows observers to run logic both before and after the core operation, with shared scope across both.
 
 ## Basic usage
 
@@ -32,11 +33,22 @@ class MyModule extends AbstractModule {
 
     // force observers to run in series
     this.mySeriesHook = new Hook({ type: Hook.Types.Series })
+
+    // middleware hook — observers wrap a core function
+    this.myMiddlewareHook = new Hook({ type: Hook.Types.Middleware })
   }
 
   async doSomething () {
     // Invoke the hook, passing any relevant data
     await this.myBasicHook.invoke(someData)
+  }
+
+  async doSomethingWrapped (data) {
+    // Invoke middleware hook — first arg is the core function, rest are passed through
+    const coreFn = async (data) => {
+      return await this.db.insert(data)
+    }
+    return this.myMiddlewareHook.invoke(coreFn, data)
   }
 }
 ```
@@ -106,21 +118,24 @@ try {
 
 Below are some commonly used hooks, which you may find useful.
 
-| Module | Hook | Description | Parameters | Mutable |
-| ------ | ---- | ----------- | ---------- | :-----: |
-| AbstractModule | `readyHook` | Module has initialised | | No |
-| AbstractApiModule | `requestHook` | API request received | `(req)` | Yes |
-| AbstractApiModule | `preInsertHook` | Before document insert | `(data, options, mongoOptions)` | Yes |
-| AbstractApiModule | `postInsertHook` | After document insert | `(doc)` | No |
-| AbstractApiModule | `preUpdateHook` | Before document update | `(originalDoc, newData, options, mongoOptions)` | Yes |
-| AbstractApiModule | `postUpdateHook` | After document update | `(originalDoc, updatedDoc)` | No |
-| AbstractApiModule | `preDeleteHook` | Before document delete | `(doc, options, mongoOptions)` | No |
-| AbstractApiModule | `postDeleteHook` | After document delete | `(doc)` | No |
-| AbstractApiModule | `accessCheckHook` | Check document access | `(req, doc)` | No |
-| AdaptFrameworkBuild | `preBuildHook` | Before course build starts | | Yes |
-| AdaptFrameworkBuild | `postBuildHook` | After course build completes | | Yes |
-| AdaptFrameworkModule | `preImportHook` | Before course import starts | | Yes |
-| AdaptFrameworkModule | `postImportHook` | After course import completes | | No |
+| Module | Hook | Description | Parameters | Type |
+| ------ | ---- | ----------- | ---------- | :--: |
+| AbstractModule | `readyHook` | Module has initialised | | Parallel |
+| AbstractApiModule | `requestHook` | API request received | `(req)` | Mutable |
+| AbstractApiModule | `insertHook` | Wraps the insert operation | `(next, data, options, mongoOptions)` | Middleware |
+| AbstractApiModule | `updateHook` | Wraps the update operation | `(next, query, data, options, mongoOptions)` | Middleware |
+| AbstractApiModule | `deleteHook` | Wraps the delete operation | `(next, query, options, mongoOptions)` | Middleware |
+| AbstractApiModule | `preInsertHook` | Before document insert | `(data, options, mongoOptions)` | Mutable |
+| AbstractApiModule | `postInsertHook` | After document insert | `(doc)` | Parallel |
+| AbstractApiModule | `preUpdateHook` | Before document update | `(originalDoc, newData, options, mongoOptions)` | Mutable |
+| AbstractApiModule | `postUpdateHook` | After document update | `(originalDoc, updatedDoc)` | Parallel |
+| AbstractApiModule | `preDeleteHook` | Before document delete | `(doc, options, mongoOptions)` | Parallel |
+| AbstractApiModule | `postDeleteHook` | After document delete | `(doc)` | Parallel |
+| AbstractApiModule | `accessCheckHook` | Check document access | `(req, doc)` | Parallel |
+| AdaptFrameworkBuild | `preBuildHook` | Before course build starts | | Mutable |
+| AdaptFrameworkBuild | `postBuildHook` | After course build completes | | Mutable |
+| AdaptFrameworkModule | `preImportHook` | Before course import starts | | Mutable |
+| AdaptFrameworkModule | `postImportHook` | After course import completes | | Parallel |
 
 ## Practical examples
 
@@ -199,6 +214,54 @@ async init () {
     await jsonschema.registerSchema('/path/to/schema.json')
   })
 }
+```
+
+### Wrapping a CRUD operation (middleware)
+
+Middleware hooks let you run logic both before and after the core operation, with shared scope. This is useful when you need pre-operation state to inform post-operation actions.
+
+```javascript
+async init () {
+  await super.init()
+  const content = await this.app.waitForModule('content')
+
+  content.deleteHook.tap(async (next, query, options, mongoOptions) => {
+    // gather related data BEFORE the delete
+    const item = await content.findOne(query)
+    const related = await this.findRelated(item)
+
+    // run the actual delete
+    const result = await next(query, options, mongoOptions)
+
+    // clean up related data AFTER — item and related are still in scope
+    for (const r of related) {
+      await this.cleanup(r)
+    }
+
+    return result
+  })
+}
+```
+
+You can also use middleware to guard operations. If you don't call `next()`, the operation is blocked:
+
+```javascript
+content.insertHook.tap(async (next, data, options, mongoOptions) => {
+  if (data._restricted) {
+    throw new Error('Cannot insert restricted items')
+  }
+  return next(data, options, mongoOptions)
+})
+```
+
+### Choosing between pre/post hooks and middleware
+
+Use **pre/post hooks** when you only care about one side of an operation — mutating data before a write, or reacting after one. Use **middleware** when you need to own the full lifecycle: gathering state before, acting after, with shared context across both.
+
+Middleware wraps the entire operation including pre/post hooks:
+
+```
+middleware → pre-hook → validate → write → post-hook → middleware returns
 ```
 
 ### Waiting for server startup
