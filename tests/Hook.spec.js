@@ -483,6 +483,36 @@ describe('Hook', () => {
         const result = await hook.invoke(core, 1)
         assert.equal(result, 2)
       })
+
+      it('should fall back to core result when observer calls next() without returning', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap(async (next, val) => {
+          await next(val) // calls next but doesn't return the result
+        })
+        const core = async (val) => val * 3
+        const result = await hook.invoke(core, 7)
+        assert.equal(result, 21)
+      })
+
+      it('should fall back to core result through multiple non-returning observers', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap(async (next, val) => { await next(val) })
+        hook.tap(async (next, val) => { await next(val) })
+        const core = async (val) => ({ id: val })
+        const result = await hook.invoke(core, 42)
+        assert.deepEqual(result, { id: 42 })
+      })
+
+      it('should prefer explicit observer return over core result fallback', async () => {
+        const hook = new Hook({ type: Hook.Types.Middleware })
+        hook.tap(async (next, val) => {
+          await next(val)
+          return 'transformed'
+        })
+        const core = async (val) => val
+        const result = await hook.invoke(core, 'original')
+        assert.equal(result, 'transformed')
+      })
     })
   })
 
