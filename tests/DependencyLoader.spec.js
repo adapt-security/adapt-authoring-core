@@ -292,7 +292,7 @@ describe('DependencyLoader', () => {
       const loader = new DependencyLoader(mockApp)
       const config = await loader.loadModuleConfig(overrideDir)
 
-      assert.equal(config.name, 'adapt-name')
+      assert.equal(config.name, 'pkg-name')
       assert.equal(config.description, 'from adapt')
 
       await fs.remove(overrideDir)
