@@ -11,7 +11,7 @@ export default class CoreModules {
 
   async getWorkflowBadges (homepage) {
     if (!homepage) return []
-    const workflows = ['tests', 'standardjs']
+    const workflows = ['tests', 'standardjs', 'releases']
     const results = await Promise.all(workflows.map(async w => {
       const url = `${homepage}/actions/workflows/${w}.yml`
       const badgeUrl = `${url}/badge.svg`
