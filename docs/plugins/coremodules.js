@@ -30,6 +30,6 @@ export default class CoreModules {
       const badges = await this.getWorkflowBadges(homepage)
       return `| ${homepage ? `[${name}](${homepage})` : name} | ${version} | ${description} | ${badges.join('<br>')} |`
     }))
-    return `| Name | Version | Description | Status |\n| - | :-: | - | :-: |\n${rows.join('\n')}`
+    return `| Name | Version | Description | Status |\n| - | :-: | - | - |\n${rows.join('\n')}`
   }
 }
