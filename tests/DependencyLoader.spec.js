@@ -306,6 +306,36 @@ describe('DependencyLoader', () => {
 
       assert.equal(config.rootDir, testModuleDir)
     })
+
+    it('should store original package name as packageName', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+
+      const config = await loader.loadModuleConfig(testModuleDir)
+
+      assert.equal(config.packageName, 'test-module')
+    })
+
+    it('should preserve scoped package name in packageName while stripping scope from name', async () => {
+      const scopedDir = path.join(__dirname, 'data', 'scoped-module')
+      await fs.ensureDir(scopedDir)
+      await fs.writeJson(path.join(scopedDir, 'package.json'), {
+        name: '@cgkineo/adapt-authoring-test',
+        version: '1.0.0'
+      })
+      await fs.writeJson(path.join(scopedDir, 'adapt-authoring.json'), {
+        module: true
+      })
+
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      const config = await loader.loadModuleConfig(scopedDir)
+
+      assert.equal(config.name, 'adapt-authoring-test')
+      assert.equal(config.packageName, '@cgkineo/adapt-authoring-test')
+
+      await fs.remove(scopedDir)
+    })
   })
 
   describe('#loadModules()', () => {
