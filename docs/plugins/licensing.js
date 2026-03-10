@@ -124,7 +124,7 @@ export default class Licensing {
 
   async generateMd () {
     let md = '<tr><th>Name</th><th>Version</th><th>License</th><th>Description</th></tr>\n'
-    this.dependencies.forEach(pkg => {
+    this.dependencies.sort((a, b) => a.name.localeCompare(b.name)).forEach(pkg => {
       md += `<tr><td>${pkg.homepage ? `<a href="${pkg.homepage}" target="_blank">${pkg.name}</a>` : pkg.name}</td><td>${pkg.version}</td><td>${pkg.license}</td><td>${pkg.description}</tr>\n`
     })
     return `<details>\n<summary>Module dependency list</summary>\n<table>${md}</table>\n</details>`
