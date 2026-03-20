@@ -25,7 +25,7 @@ Understanding the release pipeline is essential to choosing the right workflow.
 │  ├── Released manually via workflow_dispatch             │
 │  └── Runs integration tests across all modules          │
 │                                                         │
-│  Each module (api/, core/, auth/, multilang/, etc.)      │
+│  Each module (api/, core/, auth/, server/, etc.)         │
 │  ├── Is a separate git repository                       │
 │  ├── Has its own CI (linting, tests, releases)          │
 │  ├── Releases automatically on merge to master          │
@@ -47,7 +47,7 @@ AAT/
 ├── api/                    # adapt-authoring-api (own git repo)
 ├── auth/                   # adapt-authoring-auth (own git repo)
 ├── core/                   # adapt-authoring-core (own git repo)
-├── multilang/              # @cgkineo/adapt-authoring-multilang
+├── mongodb/                # adapt-authoring-mongodb (own git repo)
 ├── server/                 # adapt-authoring-server (own git repo)
 ├── ...                     # 40+ more module repos
 └── adapt-authoring/
@@ -160,16 +160,16 @@ Because versions are pinned exactly, this bump includes *only* the bugfix — no
 
 ## Workflow 2: Multi-module feature
 
-A new feature spans multiple modules — for example, adding multilingual support to the asset pipeline might touch `multilang`, `assets`, `api`, and `ui`.
+A new feature spans multiple modules — for example, adding batch export support might touch `content`, `assets`, `api`, and `ui`.
 
 ### Phase 1: Branch all affected modules
 
 ```bash
 # Create feature branches in each affected module
-for module in multilang assets api ui; do
+for module in content assets api ui; do
   cd /path/to/AAT/$module
   git checkout master && git pull origin master
-  git checkout -b feature/multilang-assets
+  git checkout -b feature/batch-export
 done
 ```
 
@@ -195,22 +195,22 @@ npm test
 Create a PR in each affected module. Use the PR description to cross-reference the related PRs:
 
 ```bash
-cd multilang
-git push -u origin feature/multilang-assets
-gh pr create --title "New: Add multilingual asset pipeline support" \
+cd content
+git push -u origin feature/batch-export
+gh pr create --title "New: Add batch export support" \
   --body "### Fixes #42
 
-Part of the multilingual assets feature. Related PRs:
-- adapt-security/adapt-authoring-assets#15
-- adapt-security/adapt-authoring-api#28
-- adapt-security/adapt-authoring-ui#33
+Part of the batch export feature. Related PRs:
+- <org>/<module-assets-repo>#15
+- <org>/<module-api-repo>#28
+- <org>/<module-ui-repo>#33
 
 ### New
-* Add language metadata to asset schema
+* Add batch selection to content schema
 
 ### Testing
-1. Upload an asset with language metadata
-2. Verify filtering works in the asset browser"
+1. Select multiple items and trigger export
+2. Verify export completes with all items"
 ```
 
 ### Phase 4: Review and approve all PRs
@@ -225,7 +225,7 @@ Once all PRs are approved and CI is green, merge them in dependency order — mo
 1. core (if changed)     — foundational, no module deps
 2. api                   — depends on core
 3. assets                — depends on api
-4. multilang             — depends on assets, api
+4. content               — depends on assets, api
 5. ui                    — depends on api
 ```
 
@@ -233,7 +233,7 @@ Wait for each module's release workflow to complete before merging the next, so 
 
 ```bash
 # Check that the release completed
-gh run list --repo adapt-security/adapt-authoring-api --limit 3
+gh run list --repo <org>/adapt-authoring-api --limit 3
 ```
 
 ### Phase 6: Update and release the parent
@@ -247,7 +247,7 @@ git checkout master && git pull origin master
 # Update all changed dependencies to their exact new versions
 npm install adapt-authoring-api@3.5.0 \
             adapt-authoring-assets@1.6.0 \
-            @cgkineo/adapt-authoring-multilang@1.1.0 \
+            adapt-authoring-content@1.1.0 \
             adapt-authoring-ui@2.1.0 \
             --save-exact --legacy-peer-deps
 
@@ -256,7 +256,7 @@ npm test
 
 # Commit and push
 git add package.json package-lock.json
-git commit -m "New: Add multilingual asset pipeline support (fixes #100)"
+git commit -m "New: Add batch export support (fixes #100)"
 git push origin master
 
 # Trigger release
@@ -271,9 +271,9 @@ You're midway through a multi-module feature when a critical bug is reported in 
 
 ```
 You are working on:
-  multilang  → branch: feature/multilang-assets
-  assets     → branch: feature/multilang-assets
-  api        → branch: feature/multilang-assets
+  content    → branch: feature/batch-export
+  assets     → branch: feature/batch-export
+  api        → branch: feature/batch-export
 
 Bug reported in: api (unrelated to your feature)
 ```
@@ -335,7 +335,7 @@ Back on your feature work, rebase to pick up the hotfix (especially important if
 
 ```bash
 cd api
-git checkout feature/multilang-assets
+git checkout feature/batch-export
 git rebase master
 
 # If you stashed earlier
