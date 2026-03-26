@@ -100,5 +100,4 @@ describe('Config', () => {
       await assert.doesNotReject(() => config.storeUserSettings())
     })
   })
-
 })
