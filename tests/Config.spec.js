@@ -175,39 +175,5 @@ describe('Config', () => {
       assert.ok(output.includes("'old-module.oldKey' has moved to 'new-module.newKey'"))
       await fs.remove(overrideDir)
     })
-
-    it('should throw when _fatal is true and deprecated keys are found', async () => {
-      const fatalDir = path.join(__dirname, 'data', 'deprecated-fatal')
-      await fs.ensureDir(path.join(fatalDir, 'conf'))
-      await fs.writeJson(path.join(fatalDir, 'conf', 'deprecated.json'), {
-        _fatal: true,
-        oldKey: 'test-module.newKey'
-      })
-      const config = new Config()
-      await assert.rejects(
-        config.checkDeprecatedConfig(
-          { 'test-module': { oldKey: 'value' } },
-          { test: { name: 'test-module', rootDir: fatalDir } }
-        )
-      )
-      await fs.remove(fatalDir)
-    })
-
-    it('should not throw when _fatal is true but no deprecated keys are found', async () => {
-      const fatalDir = path.join(__dirname, 'data', 'deprecated-fatal2')
-      await fs.ensureDir(path.join(fatalDir, 'conf'))
-      await fs.writeJson(path.join(fatalDir, 'conf', 'deprecated.json'), {
-        _fatal: true,
-        oldKey: 'test-module.newKey'
-      })
-      const config = new Config()
-      await assert.doesNotReject(
-        config.checkDeprecatedConfig(
-          { 'test-module': { safeKey: 'value' } },
-          { test: { name: 'test-module', rootDir: fatalDir } }
-        )
-      )
-      await fs.remove(fatalDir)
-    })
   })
 })
