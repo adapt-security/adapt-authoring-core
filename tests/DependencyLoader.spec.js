@@ -62,12 +62,11 @@ describe('DependencyLoader', () => {
       })
     })
 
-    it('should call app.logger when available and ready', () => {
+    it('should call app.logger when available', () => {
       let logged = false
       const mockApp = {
         rootDir: '/test',
         logger: {
-          _isReady: true, // Note: Mock uses private property to simulate ready state
           log: () => { logged = true }
         }
       }
@@ -78,27 +77,11 @@ describe('DependencyLoader', () => {
       assert.equal(logged, true)
     })
 
-    it('should fall back to console.log when logger not ready', () => {
-      const mockApp = {
-        rootDir: '/test',
-        logger: {
-          _isReady: false, // Note: Mock uses private property to check ready state
-          log: () => {}
-        }
-      }
-      const loader = new DependencyLoader(mockApp)
-
-      assert.doesNotThrow(() => {
-        loader.log('info', 'test message')
-      })
-    })
-
     it('should pass level and args to app.logger.log', () => {
       let loggedLevel, loggedName, loggedArgs
       const mockApp = {
         rootDir: '/test',
         logger: {
-          _isReady: true,
           log: (level, name, ...args) => {
             loggedLevel = level
             loggedName = name
@@ -121,7 +104,6 @@ describe('DependencyLoader', () => {
       const mockApp = {
         rootDir: '/test',
         logger: {
-          _isReady: true,
           log: (level) => { loggedLevel = level }
         }
       }
@@ -137,7 +119,6 @@ describe('DependencyLoader', () => {
       const mockApp = {
         rootDir: '/test',
         logger: {
-          _isReady: true,
           log: (level, name, ...args) => { loggedArgs = args }
         }
       }
@@ -148,7 +129,7 @@ describe('DependencyLoader', () => {
   })
 
   describe('#getConfig()', () => {
-    it('should return undefined when config is not ready', () => {
+    it('should return undefined when config is not available', () => {
       const mockApp = {
         rootDir: '/test'
       }
@@ -159,11 +140,10 @@ describe('DependencyLoader', () => {
       assert.equal(result, undefined)
     })
 
-    it('should return config value when config is ready', () => {
+    it('should return config value when config is available', () => {
       const mockApp = {
         rootDir: '/test',
         config: {
-          _isReady: true, // Note: Mock uses private property to simulate ready state
           get: (key) => {
             if (key === 'adapt-authoring-core.testKey') return 'testValue'
           }
@@ -176,27 +156,11 @@ describe('DependencyLoader', () => {
       assert.equal(result, 'testValue')
     })
 
-    it('should return undefined when config exists but is not ready', () => {
-      const mockApp = {
-        rootDir: '/test',
-        config: {
-          _isReady: false,
-          get: () => 'should not be called'
-        }
-      }
-      const loader = new DependencyLoader(mockApp)
-
-      const result = loader.getConfig('someKey')
-
-      assert.equal(result, undefined)
-    })
-
     it('should always use adapt-authoring-core prefix for config keys', () => {
       let requestedKey
       const mockApp = {
         rootDir: '/test',
         config: {
-          _isReady: true,
           get: (key) => { requestedKey = key }
         }
       }
@@ -339,63 +303,72 @@ describe('DependencyLoader', () => {
   })
 
   describe('#loadModules()', () => {
-    it('should throw DependencyError when module fails without force', async () => {
+    it('should add non-fatal failures to failedModules', async () => {
       const mockApp = { rootDir: '/test' }
       const loader = new DependencyLoader(mockApp)
       loader.configs = { 'nonexistent-module': { module: true, name: 'nonexistent-module' } }
 
-      await assert.rejects(
-        loader.loadModules(['nonexistent-module']),
-        { name: 'DependencyError' }
-      )
-    })
-
-    it('should not throw when module fails with force option', async () => {
-      const mockApp = { rootDir: '/test' }
-      const loader = new DependencyLoader(mockApp)
-      loader.configs = { 'nonexistent-module': { module: true, name: 'nonexistent-module' } }
-
-      await loader.loadModules(['nonexistent-module'], { force: true })
+      await loader.loadModules(['nonexistent-module'])
 
       assert.ok(loader.failedModules.includes('nonexistent-module'))
     })
 
-    it('should log peer dependency warnings on failure with force', async () => {
+    it('should throw when module throws a fatal error', async () => {
       const mockApp = { rootDir: '/test' }
       const loader = new DependencyLoader(mockApp)
-      loader.configs = { 'nonexistent-module': { module: true, name: 'nonexistent-module' } }
-      loader.peerDependencies = { 'nonexistent-module': ['dependent-mod'] }
+      loader.configs = { 'fatal-module': { module: true, name: 'fatal-module' } }
 
-      await loader.loadModules(['nonexistent-module'], { force: true })
-
-      assert.ok(loader.failedModules.includes('nonexistent-module'))
-    })
-
-    it('should include module name in DependencyError message', async () => {
-      const mockApp = { rootDir: '/test' }
-      const loader = new DependencyLoader(mockApp)
-      loader.configs = { 'nonexistent-module': { module: true, name: 'nonexistent-module' } }
+      // monkey-patch loadModule to throw a fatal error
+      const originalLoadModule = loader.loadModule.bind(loader)
+      loader.loadModule = async (name) => {
+        if (name === 'fatal-module') {
+          const error = new Error('Fatal')
+          error.isFatal = true
+          throw error
+        }
+        return originalLoadModule(name)
+      }
 
       await assert.rejects(
-        loader.loadModules(['nonexistent-module']),
+        loader.loadModules(['fatal-module']),
         (err) => {
-          assert.ok(err.message.includes('nonexistent-module'))
+          assert.equal(err.isFatal, true)
           return true
         }
       )
     })
 
-    it('should set cause on DependencyError', async () => {
+    it('should throw when error.cause is fatal', async () => {
+      const mockApp = { rootDir: '/test' }
+      const loader = new DependencyLoader(mockApp)
+      loader.configs = { 'fatal-module': { module: true, name: 'fatal-module' } }
+
+      loader.loadModule = async () => {
+        const cause = new Error('Root cause')
+        cause.isFatal = true
+        const error = new Error('Wrapper')
+        error.cause = cause
+        throw error
+      }
+
+      await assert.rejects(
+        loader.loadModules(['fatal-module']),
+        (err) => {
+          assert.equal(err.cause.isFatal, true)
+          return true
+        }
+      )
+    })
+
+    it('should log peer dependency warnings on non-fatal failure', async () => {
       const mockApp = { rootDir: '/test' }
       const loader = new DependencyLoader(mockApp)
       loader.configs = { 'nonexistent-module': { module: true, name: 'nonexistent-module' } }
+      loader.peerDependencies = { 'nonexistent-module': ['dependent-mod'] }
 
-      try {
-        await loader.loadModules(['nonexistent-module'])
-        assert.fail('should have thrown')
-      } catch (err) {
-        assert.ok(err.cause)
-      }
+      await loader.loadModules(['nonexistent-module'])
+
+      assert.ok(loader.failedModules.includes('nonexistent-module'))
     })
 
     it('should handle empty module list', async () => {
@@ -601,7 +574,6 @@ describe('DependencyLoader', () => {
       const mockApp = {
         rootDir: '/test',
         logger: {
-          _isReady: true,
           log: (level, name, ...args) => {
             if (typeof args[0] === 'object' && !Array.isArray(args[0]) && typeof args[0] !== 'string') {
               loggedTimes = args[0]
@@ -628,7 +600,6 @@ describe('DependencyLoader', () => {
       const mockApp = {
         rootDir: '/test',
         logger: {
-          _isReady: true,
           log: (level, name, ...args) => {
             if (typeof args[0] === 'string' && args[0] === 'LOAD') {
               loggedMessage = args[1]
