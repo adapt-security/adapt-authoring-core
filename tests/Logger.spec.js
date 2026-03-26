@@ -11,9 +11,14 @@ describe('Logger', () => {
       assert.equal(logger.config.mute, false)
     })
 
-    it('should respect mute option', () => {
-      const logger = new Logger({ mute: true })
+    it('should mute when levels is empty', () => {
+      const logger = new Logger({ levels: [] })
       assert.equal(logger.config.mute, true)
+    })
+
+    it('should not mute when levels are provided', () => {
+      const logger = new Logger({ levels: ['error'] })
+      assert.equal(logger.config.mute, false)
     })
 
     it('should configure levels from options', () => {
@@ -93,8 +98,8 @@ describe('Logger', () => {
   })
 
   describe('#log()', () => {
-    it('should not throw when muted', () => {
-      const logger = new Logger({ mute: true })
+    it('should not throw when muted via empty levels', () => {
+      const logger = new Logger({ levels: [] })
       assert.doesNotThrow(() => logger.log('error', 'test', 'message'))
     })
   })
