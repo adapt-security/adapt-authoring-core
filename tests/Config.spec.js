@@ -82,6 +82,40 @@ describe('Config', () => {
     })
   })
 
+  describe('#resolveDirectory()', () => {
+    it('should resolve $ROOT', () => {
+      const config = new Config()
+      config.rootDir = '/app'
+      assert.equal(config.resolveDirectory('$ROOT/APP_DATA/data'), path.resolve('/app', 'APP_DATA/data'))
+    })
+
+    it('should resolve $DATA', () => {
+      const config = new Config()
+      config.rootDir = '/app'
+      config._config['adapt-authoring-core.dataDir'] = '/app/APP_DATA/data'
+      assert.equal(config.resolveDirectory('$DATA/uploads'), path.resolve('/app/APP_DATA/data', 'uploads'))
+    })
+
+    it('should resolve $TEMP', () => {
+      const config = new Config()
+      config.rootDir = '/app'
+      config._config['adapt-authoring-core.tempDir'] = '/app/APP_DATA/temp'
+      assert.equal(config.resolveDirectory('$TEMP/cache'), path.resolve('/app/APP_DATA/temp', 'cache'))
+    })
+
+    it('should not resolve unresolved variables', () => {
+      const config = new Config()
+      config.rootDir = '/app'
+      assert.equal(config.resolveDirectory('$DATA/uploads'), '$DATA/uploads')
+    })
+
+    it('should return non-variable paths unchanged', () => {
+      const config = new Config()
+      config.rootDir = '/app'
+      assert.equal(config.resolveDirectory('/absolute/path'), '/absolute/path')
+    })
+  })
+
   describe('#storeUserSettings()', () => {
     let confDir
 
