@@ -24,6 +24,33 @@
       "type": "string",
       "isDirectory": true,
       "default": "$ROOT/APP_DATA/temp"
+    },
+    "loggerLevels": {
+      "description": "Configures which log levels of log should be shown. Accepts generic levels, module-specific levels and not logic (e.g. 'debug', 'debug.core' and '!debug' respectively).",
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["error", "warn", "success", "info", "debug", "verbose"]
+    },
+    "loggerMute": {
+      "description": "Whether to mute log messages",
+      "type": ["boolean", "string"],
+      "default": false
+    },
+    "loggerDateFormat": {
+      "description": "The date format to use for log timestamps",
+      "type": "string",
+      "enum": ["short", "iso"],
+      "default": "iso"
+    },
+    "loggerShowTimestamp": {
+      "description": "Whether to prepend a timestamp to each log message",
+      "type": "boolean",
+      "default": true
+    },
+    "defaultLang": {
+      "description": "The default language used by the server",
+      "type": "string",
+      "default": "en"
     }
   }
 }

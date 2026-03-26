@@ -1,4 +1,52 @@
 {
+  "FILE_SYNTAX_ERROR": {
+    "data": {
+      "path": "Path to the invalid file",
+      "message": "The error message"
+    },
+    "description": "File contains a syntax error",
+    "statusCode": 500
+  },
+  "FUNC_DISABLED": {
+    "data": {
+      "name": "The name of the function"
+    },
+    "description": "Function has been disabled",
+    "statusCode": 500
+  },
+  "FUNC_NOT_OVERRIDDEN": {
+    "data": {
+      "name": "The name of the function"
+    },
+    "description": "Function must be overridden in child class",
+    "statusCode": 500
+  },
+  "INVALID_PARAMS": {
+    "data": {
+      "params": "The invalid params"
+    },
+    "description": "Invalid parameters have been provided",
+    "statusCode": 400
+  },
+  "LOAD_ERROR": {
+    "description": "Config failed to load",
+    "statusCode": 500
+  },
+  "NOT_FOUND": {
+    "data": {
+      "id": "An identifier for the missing item",
+      "type": "Type of the missing item"
+    },
+    "description": "Requested item could not be found",
+    "statusCode": 404
+  },
+  "SERVER_ERROR": {
+    "description": "Generic server error",
+    "statusCode": 500,
+    "data": {
+      "error": "The original error"
+    }
+  },
   "SPAWN": {
     "data": {
       "cmd": "The command",
@@ -7,5 +55,12 @@
     },
     "description": "Error occurred spawning command",
     "statusCode": 500
+  },
+  "UNKNOWN_LANG": {
+    "data": {
+      "lang": "language"
+    },
+    "description": "unknown language",
+    "statusCode": 400
   }
 }
