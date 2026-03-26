@@ -100,4 +100,114 @@ describe('Config', () => {
       await assert.doesNotReject(() => config.storeUserSettings())
     })
   })
+
+  describe('#checkDeprecatedConfig()', () => {
+    let deprecatedDir
+
+    before(async () => {
+      deprecatedDir = path.join(__dirname, 'data', 'deprecated-test')
+      await fs.ensureDir(path.join(deprecatedDir, 'conf'))
+      await fs.writeJson(path.join(deprecatedDir, 'conf', 'deprecated.json'), {
+        oldKey: 'test-module.newKey',
+        removedKey: null
+      })
+    })
+
+    after(async () => {
+      await fs.remove(deprecatedDir)
+    })
+
+    it('should warn on moved keys', async () => {
+      let output = ''
+      const originalLog = console.log
+      console.log = (msg) => { output += msg }
+      const config = new Config()
+      await config.checkDeprecatedConfig(
+        { 'test-module': { oldKey: 'value' } },
+        { test: { name: 'test-module', rootDir: deprecatedDir } }
+      )
+      console.log = originalLog
+      assert.ok(output.includes("'test-module.oldKey' has moved to 'test-module.newKey'"))
+    })
+
+    it('should warn on removed keys', async () => {
+      let output = ''
+      const originalLog = console.log
+      console.log = (msg) => { output += msg }
+      const config = new Config()
+      await config.checkDeprecatedConfig(
+        { 'test-module': { removedKey: true } },
+        { test: { name: 'test-module', rootDir: deprecatedDir } }
+      )
+      console.log = originalLog
+      assert.ok(output.includes('has been removed'))
+    })
+
+    it('should not warn when no deprecated keys present', async () => {
+      let output = ''
+      const originalLog = console.log
+      console.log = (msg) => { output += msg }
+      const config = new Config()
+      await config.checkDeprecatedConfig(
+        { 'test-module': { safeKey: 'value' } },
+        { test: { name: 'test-module', rootDir: deprecatedDir } }
+      )
+      console.log = originalLog
+      assert.equal(output, '')
+    })
+
+    it('should use _module override to check a different module section', async () => {
+      const overrideDir = path.join(__dirname, 'data', 'deprecated-override')
+      await fs.ensureDir(path.join(overrideDir, 'conf'))
+      await fs.writeJson(path.join(overrideDir, 'conf', 'deprecated.json'), {
+        _module: 'old-module',
+        oldKey: 'new-module.newKey'
+      })
+      let output = ''
+      const originalLog = console.log
+      console.log = (msg) => { output += msg }
+      const config = new Config()
+      await config.checkDeprecatedConfig(
+        { 'old-module': { oldKey: 'value' } },
+        { test: { name: 'new-module', rootDir: overrideDir } }
+      )
+      console.log = originalLog
+      assert.ok(output.includes("'old-module.oldKey' has moved to 'new-module.newKey'"))
+      await fs.remove(overrideDir)
+    })
+
+    it('should throw when _fatal is true and deprecated keys are found', async () => {
+      const fatalDir = path.join(__dirname, 'data', 'deprecated-fatal')
+      await fs.ensureDir(path.join(fatalDir, 'conf'))
+      await fs.writeJson(path.join(fatalDir, 'conf', 'deprecated.json'), {
+        _fatal: true,
+        oldKey: 'test-module.newKey'
+      })
+      const config = new Config()
+      await assert.rejects(
+        config.checkDeprecatedConfig(
+          { 'test-module': { oldKey: 'value' } },
+          { test: { name: 'test-module', rootDir: fatalDir } }
+        )
+      )
+      await fs.remove(fatalDir)
+    })
+
+    it('should not throw when _fatal is true but no deprecated keys are found', async () => {
+      const fatalDir = path.join(__dirname, 'data', 'deprecated-fatal2')
+      await fs.ensureDir(path.join(fatalDir, 'conf'))
+      await fs.writeJson(path.join(fatalDir, 'conf', 'deprecated.json'), {
+        _fatal: true,
+        oldKey: 'test-module.newKey'
+      })
+      const config = new Config()
+      await assert.doesNotReject(
+        config.checkDeprecatedConfig(
+          { 'test-module': { safeKey: 'value' } },
+          { test: { name: 'test-module', rootDir: fatalDir } }
+        )
+      )
+      await fs.remove(fatalDir)
+    })
+  })
 })
