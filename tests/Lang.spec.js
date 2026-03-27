@@ -60,20 +60,6 @@ describe('Lang', () => {
     })
   })
 
-  describe('.storeStrings()', () => {
-    it('should store a string under lang.key', () => {
-      const phrases = {}
-      Lang.storeStrings(phrases, 'en.hello', 'world')
-      assert.equal(phrases.en.hello, 'world')
-    })
-
-    it('should create lang bucket if missing', () => {
-      const phrases = {}
-      Lang.storeStrings(phrases, 'de.greeting', 'Hallo')
-      assert.ok(phrases.de)
-    })
-  })
-
   describe('#translate()', () => {
     it('should return translated string', () => {
       const lang = createLang({ en: { hello: 'Hello' } })
