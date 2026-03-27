@@ -33,44 +33,44 @@ describe('Errors', () => {
     await fs.remove(testDir)
   })
 
-  describe('.load()', () => {
-    it('should load error definitions from dependencies', async () => {
+  describe('constructor', () => {
+    it('should load error definitions from dependencies', () => {
       const deps = { test: { name: 'test', rootDir: testDir } }
-      const errors = await Errors.load(deps)
+      const errors = new Errors({ dependencies: deps })
       assert.ok(errors.TEST_ERROR)
       assert.ok(errors.FATAL_ERROR)
     })
 
-    it('should return AdaptError instances', async () => {
+    it('should return AdaptError instances', () => {
       const deps = { test: { name: 'test', rootDir: testDir } }
-      const errors = await Errors.load(deps)
+      const errors = new Errors({ dependencies: deps })
       assert.ok(errors.TEST_ERROR instanceof AdaptError)
     })
 
-    it('should return fresh instances on each access', async () => {
+    it('should return fresh instances on each access', () => {
       const deps = { test: { name: 'test', rootDir: testDir } }
-      const errors = await Errors.load(deps)
+      const errors = new Errors({ dependencies: deps })
       assert.notEqual(errors.TEST_ERROR, errors.TEST_ERROR)
     })
 
-    it('should set statusCode from definition', async () => {
+    it('should set statusCode from definition', () => {
       const deps = { test: { name: 'test', rootDir: testDir } }
-      const errors = await Errors.load(deps)
+      const errors = new Errors({ dependencies: deps })
       assert.equal(errors.TEST_ERROR.statusCode, 400)
     })
 
-    it('should set isFatal from definition', async () => {
+    it('should set isFatal from definition', () => {
       const deps = { test: { name: 'test', rootDir: testDir } }
-      const errors = await Errors.load(deps)
+      const errors = new Errors({ dependencies: deps })
       assert.equal(errors.FATAL_ERROR.isFatal, true)
       assert.equal(errors.TEST_ERROR.isFatal, false)
     })
 
-    it('should warn on duplicate error codes', async () => {
+    it('should warn on duplicate error codes', () => {
       const dupDir = path.join(__dirname, 'data', 'errors-dup')
       const errorsDir = path.join(dupDir, 'errors')
-      await fs.ensureDir(errorsDir)
-      await fs.writeJson(path.join(errorsDir, 'dup.json'), {
+      fs.ensureDirSync(errorsDir)
+      fs.writeJsonSync(path.join(errorsDir, 'dup.json'), {
         TEST_ERROR: { description: 'duplicate', statusCode: 500 }
       })
       const deps = {
@@ -78,13 +78,13 @@ describe('Errors', () => {
         dup: { name: 'dup', rootDir: dupDir }
       }
       let warned = false
-      await Errors.load(deps, () => { warned = true })
+      new Errors({ dependencies: deps, log: () => { warned = true } }) // eslint-disable-line no-new
       assert.ok(warned)
-      await fs.remove(dupDir)
+      fs.removeSync(dupDir)
     })
 
-    it('should handle empty dependencies', async () => {
-      const errors = await Errors.load({})
+    it('should handle empty dependencies', () => {
+      const errors = new Errors({ dependencies: {} })
       assert.deepEqual(Object.keys(errors), [])
     })
   })

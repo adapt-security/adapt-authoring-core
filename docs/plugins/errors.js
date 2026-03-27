@@ -14,9 +14,9 @@ export default class Errors {
 
   dataToMd (data) {
     if (!data) return ''
-    return Object.entries(data).reduce((s, [k, v]) => {
+    return Object.entries(data).reduce((acc, [k, v]) => {
       const nested = typeof v === 'object' ? this.dataToMd(v) : v
-      return `${s}<li>\`${k}\`: ${nested}</li>`
+      return `${acc}<li>\`${k}\`: ${nested}</li>`
     }, '')
   }
 }

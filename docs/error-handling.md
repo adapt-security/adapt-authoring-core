@@ -31,14 +31,14 @@ Some examples:
 ## Defining errors
 Depending on the kinds of error that you're dealing with in your code, it may be useful to include a set of custom error definitions specific to your code.
 
-Defining useful errors is a critical part of any software system. The Errors library makes it easy to define errors for your own modules, and make use of errors defined in other modules.
+Defining useful errors is a critical part of any software system. The error registry makes it easy to define errors for your own modules, and make use of errors defined in other modules.
 
 ## Catching errors
 
 ## Throwing errors
-As mentioned above, it is preferable to catch errors internally in your code and re-throw these errors
+As mentioned above, it is preferable to catch errors internally in your code and re-throw these errors.
 
-The Errors library acts as a central store for all errors defined in the system, and errors can be accessed and thrown from here. For convenience, the Errors library is made available directly as a property of the main App instance via `app.errors`.
+The error registry acts as a central store for all errors defined in the system, and errors can be accessed and thrown from here. For convenience, the errors registry is available directly as a property of the main App instance via `app.errors`:
 
 ```js
 try {
