@@ -9,7 +9,6 @@ Before going into specifics, it would be useful to discuss application errors in
 You will need to deal with each category of error differently. Below are some general tips on handling each type of error.
 
 ## Initialisation errors
-## Initialisation errors
 Any errors which occur during initialisation should be captured and logged as appropriate. Depending on the type of error, it may or may not be considered fatal to your code.
 
 Some examples:
@@ -23,7 +22,7 @@ Some examples:
 Some examples:
 - For a database-handler module, disconnecting from the database is an expected error, and can be handled and rectified easily.
 
-## User errors errors
+## User errors
 User errors are any errors which are caused as a direct result of a user performing an action incorrectly. It is even *more* critical with user errors that the error is as specific and descriptive as possible, as the response needs to be informative and instructive to the user that caused the error. Failing to do so will result in an unpleasant user experience.
 
 Some examples:
@@ -32,14 +31,14 @@ Some examples:
 ## Defining errors
 Depending on the kinds of error that you're dealing with in your code, it may be useful to include a set of custom error definitions specific to your code.
 
-Defining useful errors is a critical part of any software system. The ErrorsModule makes it easy to define errors for your own modules, and make use of errors defined in other modules.
+Defining useful errors is a critical part of any software system. The Errors library makes it easy to define errors for your own modules, and make use of errors defined in other modules.
 
 ## Catching errors
 
 ## Throwing errors
 As mentioned above, it is preferable to catch errors internally in your code and re-throw these errors
 
-The ErrorsModule acts as a central store for all errors defined in the system, and errors can be accessed and thrown from here. For convenience, the Errors module is made available directly as a property of the main App instance, or by referencing the module in the usual way: `App#waitForModule('errors)`
+The Errors library acts as a central store for all errors defined in the system, and errors can be accessed and thrown from here. For convenience, the Errors library is made available directly as a property of the main App instance via `app.errors`.
 
 ```js
 try {
