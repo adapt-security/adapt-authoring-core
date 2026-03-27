@@ -7,6 +7,12 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+function createLang (phrases, defaultLang = 'en') {
+  const lang = new Lang({ dependencies: {}, defaultLang, rootDir: __dirname })
+  lang.phrases = phrases
+  return lang
+}
+
 describe('Lang', () => {
   let testDir
 
@@ -68,47 +74,41 @@ describe('Lang', () => {
     })
   })
 
-  describe('.translate()', () => {
+  describe('#translate()', () => {
     it('should return translated string', () => {
-      const phrases = { en: { hello: 'Hello' } }
-      const result = Lang.translate(phrases, 'en', () => {}, 'en', 'hello')
-      assert.equal(result, 'Hello')
+      const lang = createLang({ en: { hello: 'Hello' } })
+      assert.equal(lang.translate('en', 'hello'), 'Hello')
     })
 
     it('should substitute data placeholders', () => {
       // eslint-disable-next-line no-template-curly-in-string
-      const phrases = { en: { greeting: 'Hello ${name}' } }
-      const result = Lang.translate(phrases, 'en', () => {}, 'en', 'greeting', { name: 'World' })
-      assert.equal(result, 'Hello World')
+      const lang = createLang({ en: { greeting: 'Hello ${name}' } })
+      assert.equal(lang.translate('en', 'greeting', { name: 'World' }), 'Hello World')
     })
 
     it('should fall back to default lang when lang is not a string', () => {
-      const phrases = { en: { hello: 'Hello' } }
-      const result = Lang.translate(phrases, 'en', () => {}, undefined, 'hello')
-      assert.equal(result, 'Hello')
+      const lang = createLang({ en: { hello: 'Hello' } })
+      assert.equal(lang.translate(undefined, 'hello'), 'Hello')
     })
 
     it('should return key and warn when key is missing', () => {
-      const phrases = { en: {} }
       let warned = false
-      const result = Lang.translate(phrases, 'en', () => { warned = true }, 'en', 'missing.key')
-      assert.equal(result, 'missing.key')
+      const lang = createLang({ en: {} })
+      lang.log = () => { warned = true }
+      assert.equal(lang.translate('en', 'missing.key'), 'missing.key')
       assert.ok(warned)
     })
-  })
 
-  describe('.translateError()', () => {
-    it('should return non-error values unchanged', () => {
-      const result = Lang.translateError({}, 'en', () => {}, 'en', 'plain string')
-      assert.equal(result, 'plain string')
+    it('should return non-error, non-string values unchanged', () => {
+      const lang = createLang({})
+      assert.equal(lang.translate('en', 42), 42)
     })
 
     it('should translate an error using its code', () => {
-      const phrases = { en: { 'error.TEST': 'Translated error' } }
+      const lang = createLang({ en: { 'error.TEST': 'Translated error' } })
       const error = new Error('TEST')
       error.code = 'TEST'
-      const result = Lang.translateError(phrases, 'en', () => {}, 'en', error)
-      assert.equal(result, 'Translated error')
+      assert.equal(lang.translate('en', error), 'Translated error')
     })
   })
 })
