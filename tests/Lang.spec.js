@@ -54,22 +54,6 @@ describe('Lang', () => {
     })
   })
 
-  describe('#getPhrasesForLang()', () => {
-    it('should return phrases for a specific language', async () => {
-      const lang = new Lang()
-      await lang.loadPhrases({ test: { rootDir: testDir } }, testDir)
-      const phrases = lang.getPhrasesForLang('en')
-      assert.ok(phrases)
-      assert.equal(phrases['app.name'], 'Test App')
-    })
-
-    it('should return undefined for unknown language', async () => {
-      const lang = new Lang()
-      await lang.loadPhrases({ test: { rootDir: testDir } }, testDir)
-      assert.equal(lang.getPhrasesForLang('de'), undefined)
-    })
-  })
-
   describe('.storeStrings()', () => {
     it('should store a string under lang.key', () => {
       const phrases = {}

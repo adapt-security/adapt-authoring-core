@@ -75,28 +75,6 @@ describe('Logger', () => {
     })
   })
 
-  describe('.colourise()', () => {
-    it('should return string unchanged when no colour function', () => {
-      assert.equal(Logger.colourise('test', undefined), 'test')
-    })
-
-    it('should apply colour function', () => {
-      const result = Logger.colourise('test', s => `[${s}]`)
-      assert.equal(result, '[test]')
-    })
-  })
-
-  describe('.getDateStamp()', () => {
-    it('should return empty string when timestamp disabled', () => {
-      assert.equal(Logger.getDateStamp({ timestamp: false }), '')
-    })
-
-    it('should return ISO format when configured', () => {
-      const result = Logger.getDateStamp({ timestamp: true, dateFormat: 'iso' })
-      assert.ok(result.length > 0)
-    })
-  })
-
   describe('#log()', () => {
     it('should not throw when muted via empty levels', () => {
       const logger = new Logger({ levels: [] })

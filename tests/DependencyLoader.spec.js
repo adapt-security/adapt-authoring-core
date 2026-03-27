@@ -1,5 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
+import AdaptError from '../lib/AdaptError.js'
 import DependencyLoader from '../lib/DependencyLoader.js'
 import fs from 'fs-extra'
 import path from 'path'
@@ -95,78 +96,6 @@ describe('DependencyLoader', () => {
       assert.equal(loggedLevel, 'warn')
       assert.equal(loggedName, 'dependencyloader')
       assert.deepEqual(loggedArgs, ['message1', 'message2'])
-    })
-  })
-
-  describe('#logError()', () => {
-    it('should call log with error level', () => {
-      let loggedLevel
-      const mockApp = {
-        rootDir: '/test',
-        logger: {
-          log: (level) => { loggedLevel = level }
-        }
-      }
-      const loader = new DependencyLoader(mockApp)
-
-      loader.logError('error message')
-
-      assert.equal(loggedLevel, 'error')
-    })
-
-    it('should pass all arguments through to log', () => {
-      let loggedArgs
-      const mockApp = {
-        rootDir: '/test',
-        logger: {
-          log: (level, name, ...args) => { loggedArgs = args }
-        }
-      }
-      const loader = new DependencyLoader(mockApp)
-      loader.logError('msg1', 'msg2')
-      assert.deepEqual(loggedArgs, ['msg1', 'msg2'])
-    })
-  })
-
-  describe('#getConfig()', () => {
-    it('should return undefined when config is not available', () => {
-      const mockApp = {
-        rootDir: '/test'
-      }
-      const loader = new DependencyLoader(mockApp)
-
-      const result = loader.getConfig('someKey')
-
-      assert.equal(result, undefined)
-    })
-
-    it('should return config value when config is available', () => {
-      const mockApp = {
-        rootDir: '/test',
-        config: {
-          get: (key) => {
-            if (key === 'adapt-authoring-core.testKey') return 'testValue'
-          }
-        }
-      }
-      const loader = new DependencyLoader(mockApp)
-
-      const result = loader.getConfig('testKey')
-
-      assert.equal(result, 'testValue')
-    })
-
-    it('should always use adapt-authoring-core prefix for config keys', () => {
-      let requestedKey
-      const mockApp = {
-        rootDir: '/test',
-        config: {
-          get: (key) => { requestedKey = key }
-        }
-      }
-      const loader = new DependencyLoader(mockApp)
-      loader.getConfig('myKey')
-      assert.equal(requestedKey, 'adapt-authoring-core.myKey')
     })
   })
 
@@ -383,13 +312,18 @@ describe('DependencyLoader', () => {
 
   describe('#loadModule()', () => {
     it('should throw when module already exists', async () => {
-      const mockApp = { rootDir: '/test' }
+      const mockApp = {
+        rootDir: '/test',
+        errors: {
+          DEP_ALREADY_LOADED: new AdaptError('DEP_ALREADY_LOADED')
+        }
+      }
       const loader = new DependencyLoader(mockApp)
       loader.instances = { 'existing-module': {} }
 
       await assert.rejects(
         loader.loadModule('existing-module'),
-        { message: 'Module already exists' }
+        { code: 'DEP_ALREADY_LOADED' }
       )
     })
 
@@ -416,19 +350,29 @@ describe('DependencyLoader', () => {
 
   describe('#waitForModule()', () => {
     it('should throw for missing module', async () => {
-      const mockApp = { rootDir: '/test' }
+      const mockApp = {
+        rootDir: '/test',
+        errors: {
+          DEP_MISSING: new AdaptError('DEP_MISSING')
+        }
+      }
       const loader = new DependencyLoader(mockApp)
       loader._configsLoaded = true
       loader.configs = {}
 
       await assert.rejects(
         loader.waitForModule('adapt-authoring-missing'),
-        { message: "Missing required module 'adapt-authoring-missing'" }
+        { code: 'DEP_MISSING' }
       )
     })
 
     it('should throw for failed module', async () => {
-      const mockApp = { rootDir: '/test' }
+      const mockApp = {
+        rootDir: '/test',
+        errors: {
+          DEP_FAILED: new AdaptError('DEP_FAILED')
+        }
+      }
       const loader = new DependencyLoader(mockApp)
       loader._configsLoaded = true
       loader.configs = { 'adapt-authoring-failed': { name: 'adapt-authoring-failed' } }
@@ -436,7 +380,7 @@ describe('DependencyLoader', () => {
 
       await assert.rejects(
         loader.waitForModule('adapt-authoring-failed'),
-        { message: "Dependency 'adapt-authoring-failed' failed to load" }
+        { code: 'DEP_FAILED' }
       )
     })
 

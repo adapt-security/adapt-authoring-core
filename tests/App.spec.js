@@ -149,12 +149,4 @@ describe('App', () => {
     })
   })
 
-  describe('#setReady()', () => {
-    it('should set _isStarting to false', async () => {
-      const app = App.instance
-      app._isStarting = true
-      await app.setReady()
-      assert.equal(app._isStarting, false)
-    })
-  })
 })

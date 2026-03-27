@@ -117,20 +117,10 @@ describe('Config', () => {
   })
 
   describe('#storeUserSettings()', () => {
-    let confDir
-
-    before(async () => {
-      confDir = path.join(__dirname, 'data', 'config-test', 'conf')
-      await fs.ensureDir(confDir)
-    })
-
-    after(async () => {
-      await fs.remove(path.join(__dirname, 'data', 'config-test'))
-    })
-
     it('should handle missing config file gracefully', async () => {
       const config = new Config()
-      config.configFilePath = path.join(confDir, 'nonexistent.config.js')
+      config.configFilePath = '/nonexistent/path/config.js'
+      config.logger = { log: () => {} }
       await assert.doesNotReject(() => config.storeUserSettings())
     })
   })
