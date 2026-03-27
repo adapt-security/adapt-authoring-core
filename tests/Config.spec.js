@@ -1,11 +1,7 @@
-import { describe, it, before, after } from 'node:test'
+import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import Config from '../lib/Config.js'
-import fs from 'fs-extra'
 import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 describe('Config', () => {
   describe('constructor', () => {
@@ -120,7 +116,6 @@ describe('Config', () => {
     it('should handle missing config file gracefully', async () => {
       const config = new Config()
       config.configFilePath = '/nonexistent/path/config.js'
-      config.logger = { log: () => {} }
       await assert.doesNotReject(() => config.storeUserSettings())
     })
   })

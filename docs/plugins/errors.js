@@ -12,10 +12,11 @@ export default class Errors {
     }, '| Error code | Description | HTTP status code | Supplemental data |\n| - | - | :-: | - |')
   }
 
-  dataToMd (data, s = '') {
-    if (!data) return s
-    return Object.entries(data).reduce((s, [k, v]) => {
-      return `${s}<li>\`${k}\`: ${typeof v === 'object' ? this.dataToMd(v, s) : v}</li>`
-    }, s)
+  dataToMd (data) {
+    if (!data) return ''
+    return Object.entries(data).reduce((acc, [k, v]) => {
+      const nested = typeof v === 'object' ? this.dataToMd(v) : v
+      return `${acc}<li>\`${k}\`: ${nested}</li>`
+    }, '')
   }
 }
