@@ -7,6 +7,38 @@
     "description": "File contains a syntax error",
     "statusCode": 500
   },
+  "DEP_ALREADY_LOADED": {
+    "data": { "module": "The module name" },
+    "description": "Module has already been loaded",
+    "statusCode": 500
+  },
+  "DEP_FAILED": {
+    "data": { "module": "The module name" },
+    "description": "Required dependency failed to load",
+    "statusCode": 500,
+    "isFatal": true
+  },
+  "DEP_INVALID_EXPORT": {
+    "data": { "module": "The module name" },
+    "description": "Module must export a class as its default export",
+    "statusCode": 500
+  },
+  "DEP_MISSING": {
+    "data": { "module": "The module name" },
+    "description": "Required module is not installed",
+    "statusCode": 500,
+    "isFatal": true
+  },
+  "DEP_NO_ONREADY": {
+    "data": { "module": "The module name" },
+    "description": "Module must define an onReady function",
+    "statusCode": 500
+  },
+  "DEP_TIMEOUT": {
+    "data": { "module": "The module name", "timeout": "The timeout in ms" },
+    "description": "Module load exceeded timeout",
+    "statusCode": 500
+  },
   "FUNC_DISABLED": {
     "data": {
       "name": "The name of the function"
