@@ -448,13 +448,8 @@ describe('AbstractModule', () => {
       assert.equal(result, 'testValue')
     })
 
-    it('should return undefined if config.get throws', async () => {
+    it('should return undefined when config is not available', async () => {
       const mockApp = {
-        config: {
-          get: () => {
-            throw new Error('config error')
-          }
-        },
         dependencyloader: {
           moduleLoadedHook: {
             tap: () => {},
@@ -615,57 +610,12 @@ describe('AbstractModule', () => {
       assert.deepEqual(loggedArgs, ['arg1', 'arg2', 'arg3'])
     })
 
-    it('should queue log and deliver when logger module loads', async () => {
-      let loggedLevel
-      let tapCallback
-      const mockApp = {
-        dependencyloader: {
-          moduleLoadedHook: {
-            tap: (fn) => { tapCallback = fn },
-            untap: () => {}
-          }
-        }
-      }
+    it('should silently skip when logger is not available', async () => {
+      const mockApp = {}
       const module = new AbstractModule(mockApp, { name: 'test-mod' })
       await module.onReady()
 
-      module.log('warn', 'deferred message')
-      assert.ok(tapCallback)
-
-      mockApp.logger = {
-        name: 'adapt-authoring-logger',
-        log: (level) => {
-          loggedLevel = level
-        }
-      }
-
-      tapCallback(null, { name: 'adapt-authoring-logger' })
-      assert.equal(loggedLevel, 'warn')
-    })
-
-    it('should not log when loaded module is not the logger', async () => {
-      const logCalled = false
-      let tapCallback
-      const mockApp = {
-        dependencyloader: {
-          moduleLoadedHook: {
-            tap: (fn) => { tapCallback = fn },
-            untap: () => {}
-          }
-        }
-      }
-      const module = new AbstractModule(mockApp, { name: 'test-mod' })
-      await module.onReady()
-
-      // No logger set yet, so log queues the callback
-      module.log('info', 'some message')
-      assert.ok(tapCallback)
-
-      // Now simulate a non-logger module loading - _log checks !this.app.logger
-      // which is true (no logger), so it returns false
-      const result = tapCallback(null, { name: 'adapt-authoring-other' })
-      assert.equal(result, false)
-      assert.equal(logCalled, false)
+      assert.doesNotThrow(() => module.log('warn', 'no logger'))
     })
   })
 
