@@ -70,7 +70,7 @@ describe('DataCache', () => {
     afterEach(() => restore())
 
     it('should query the DB and log a miss on first call', async () => {
-      const cache = new DataCache({ enable: true, lifespan: 10000 })
+      const cache = new DataCache({ enable: true, lifespan: 10000, verboseLogs: true })
       const result = await cache.get({ _id: '1' }, { collectionName: 'users' }, {})
       assert.deepEqual(result, [{ _id: 'stub' }])
       assert.equal(findCalls.length, 1)
@@ -82,13 +82,20 @@ describe('DataCache', () => {
     })
 
     it('should return cached data and log a hit on a repeat call', async () => {
-      const cache = new DataCache({ enable: true, lifespan: 10000 })
+      const cache = new DataCache({ enable: true, lifespan: 10000, verboseLogs: true })
       await cache.get({ _id: '1' }, { collectionName: 'users' }, {})
       await cache.get({ _id: '1' }, { collectionName: 'users' }, {})
       assert.equal(findCalls.length, 1)
       assert.equal(cache.hits, 1)
       assert.equal(cache.misses, 1)
       assert.equal(logCalls[1][2], 'hit')
+    })
+
+    it('should not log when verboseLogs is not set', async () => {
+      const cache = new DataCache({ enable: true, lifespan: 10000 })
+      await cache.get({ _id: '1' }, { collectionName: 'users' }, {})
+      await cache.get({ _id: '1' }, { collectionName: 'users' }, {})
+      assert.equal(logCalls.length, 0)
     })
 
     it('should re-query the DB after an entry expires', async () => {
