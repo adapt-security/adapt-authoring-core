@@ -26,7 +26,7 @@
       "default": "$ROOT/APP_DATA/temp"
     },
     "logLevels": {
-      "description": "Configures which log levels should be shown. Accepts generic levels, module-specific levels and not logic (e.g. 'debug', 'debug.core' and '!debug' respectively). Set to an empty array to mute all logging.",
+      "description": "Configures which log levels should be shown. Entries can target four granularities, with more-specific rules winning over less-specific. Global level: 'debug', '!debug'. Per-level module override: 'debug.core', '!debug.core'. Id-wide override (applies at every level): 'core', '!core'. Line-level override (matches when args[0] is the named short id): 'debug.core.LOAD', '!debug.core.LOAD'. Set to an empty array to mute all logging.",
       "type": "array",
       "items": { "type": "string" },
       "default": ["error", "warn", "success", "info", "debug", "verbose"]
