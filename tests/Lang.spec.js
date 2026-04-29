@@ -96,5 +96,21 @@ describe('Lang', () => {
       error.code = 'TEST'
       assert.equal(lang.translate('en', error), 'Translated error')
     })
+
+    it('should fall back to error message when error has no code', () => {
+      const lang = createLang({ en: {} })
+      lang.log = () => {}
+      assert.equal(lang.translate('en', new Error('boom')), 'boom')
+    })
+
+    it('should substitute a code-less error in data using its message', () => {
+      // eslint-disable-next-line no-template-curly-in-string
+      const lang = createLang({ en: { 'error.OUTER': 'Failed: ${cause}' } })
+      lang.log = () => {}
+      const outer = new Error('OUTER')
+      outer.code = 'OUTER'
+      outer.data = { cause: new Error('disk full') }
+      assert.equal(lang.translate('en', outer), 'Failed: disk full')
+    })
   })
 })
