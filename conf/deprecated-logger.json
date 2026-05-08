@@ -1,0 +1,7 @@
+{
+  "_module": "adapt-authoring-logger",
+  "levels": "adapt-authoring-core.logLevels",
+  "showTimestamp": "adapt-authoring-core.showLogTimestamp",
+  "mute": null,
+  "dateFormat": null
+}

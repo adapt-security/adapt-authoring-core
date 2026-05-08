@@ -1,4 +1,84 @@
 {
+  "FILE_SYNTAX_ERROR": {
+    "data": {
+      "path": "Path to the invalid file",
+      "message": "The error message"
+    },
+    "description": "File contains a syntax error",
+    "statusCode": 500
+  },
+  "DEP_ALREADY_LOADED": {
+    "data": { "module": "The module name" },
+    "description": "Module has already been loaded",
+    "statusCode": 500
+  },
+  "DEP_FAILED": {
+    "data": { "module": "The module name" },
+    "description": "Required dependency failed to load",
+    "statusCode": 500,
+    "isFatal": true
+  },
+  "DEP_INVALID_EXPORT": {
+    "data": { "module": "The module name" },
+    "description": "Module must export a class as its default export",
+    "statusCode": 500
+  },
+  "DEP_MISSING": {
+    "data": { "module": "The module name" },
+    "description": "Required module is not installed",
+    "statusCode": 500,
+    "isFatal": true
+  },
+  "DEP_NO_ONREADY": {
+    "data": { "module": "The module name" },
+    "description": "Module must define an onReady function",
+    "statusCode": 500
+  },
+  "DEP_TIMEOUT": {
+    "data": { "module": "The module name", "timeout": "The timeout in ms" },
+    "description": "Module load exceeded timeout",
+    "statusCode": 500
+  },
+  "FUNC_DISABLED": {
+    "data": {
+      "name": "The name of the function"
+    },
+    "description": "Function has been disabled",
+    "statusCode": 500
+  },
+  "FUNC_NOT_OVERRIDDEN": {
+    "data": {
+      "name": "The name of the function"
+    },
+    "description": "Function must be overridden in child class",
+    "statusCode": 500
+  },
+  "INVALID_PARAMS": {
+    "data": {
+      "params": "The invalid params"
+    },
+    "description": "Invalid parameters have been provided",
+    "statusCode": 400
+  },
+  "LOAD_ERROR": {
+    "description": "Config failed to load",
+    "statusCode": 500
+  },
+  "NOT_FOUND": {
+    "data": {
+      "id": "An identifier for the missing item",
+      "type": "Type of the missing item"
+    },
+    "description": "Requested item could not be found",
+    "statusCode": 404
+  },
+  "SERVER_ERROR": {
+    "description": "Generic server error",
+    "statusCode": 500,
+    "data": {
+      "error": "The original error"
+    }
+  },
   "SPAWN": {
     "data": {
       "cmd": "The command",
@@ -7,5 +87,12 @@
     },
     "description": "Error occurred spawning command",
     "statusCode": 500
+  },
+  "UNKNOWN_LANG": {
+    "data": {
+      "lang": "language"
+    },
+    "description": "unknown language",
+    "statusCode": 400
   }
 }
