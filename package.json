@@ -11,7 +11,7 @@
   },
   "repository": "github:adapt-security/adapt-authoring-core",
   "dependencies": {
-    "adapt-authoring-migrations": "^v2.0.0",
+    "adapt-authoring-migrations": "^2.0.0",
     "adapt-schemas": "^3.1.0",
     "chalk": "^5.4.1",
     "glob": "^13.0.0"
