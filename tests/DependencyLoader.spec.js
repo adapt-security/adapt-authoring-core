@@ -4,7 +4,8 @@ import AdaptError from '../lib/AdaptError.js'
 import DependencyLoader from '../lib/DependencyLoader.js'
 import fs from 'fs-extra'
 import path from 'path'
-import { fileURLToPath } from 'url'
+import { fileURLToPath, pathToFileURL } from 'url'
+import { setTimeout as wait } from 'timers/promises'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -129,6 +130,39 @@ describe('DependencyLoader', () => {
       await loader.loadConfigs()
       const names = Object.keys(loader.configs)
       assert.equal(names[0], 'adapt-authoring-core')
+    })
+  })
+
+  describe('#loadConfigs() with nested duplicate', () => {
+    let testRootDir
+
+    before(async () => {
+      testRootDir = path.join(__dirname, 'data', 'loadconfigs-nested-root')
+      const topCoreDir = path.join(testRootDir, 'node_modules', 'adapt-authoring-core')
+      const otherDir = path.join(testRootDir, 'node_modules', 'adapt-authoring-other')
+      const nestedCoreDir = path.join(otherDir, 'node_modules', 'adapt-authoring-core')
+      await fs.ensureDir(topCoreDir)
+      await fs.ensureDir(nestedCoreDir)
+      await fs.writeJson(path.join(topCoreDir, 'package.json'), { name: 'adapt-authoring-core', version: '3.0.0' })
+      await fs.writeJson(path.join(topCoreDir, 'adapt-authoring.json'), { module: false })
+      await fs.writeJson(path.join(otherDir, 'package.json'), { name: 'adapt-authoring-other' })
+      await fs.writeJson(path.join(otherDir, 'adapt-authoring.json'), { module: true })
+      await fs.writeJson(path.join(nestedCoreDir, 'package.json'), { name: 'adapt-authoring-core', version: '1.9.2' })
+      await fs.writeJson(path.join(nestedCoreDir, 'adapt-authoring.json'), { module: false })
+    })
+
+    after(async () => {
+      await fs.remove(testRootDir)
+    })
+
+    it('should prefer the top-level core over a nested duplicate', async () => {
+      const mockApp = { rootDir: testRootDir, name: 'adapt-authoring-core' }
+      const loader = new DependencyLoader(mockApp)
+      await loader.loadConfigs()
+      const winningPath = loader.configs['adapt-authoring-core'].rootDir
+      const expected = path.join(testRootDir, 'node_modules', 'adapt-authoring-core') + path.sep
+      assert.equal(winningPath, expected)
+      assert.equal(loader.configs['adapt-authoring-core'].version, '3.0.0')
     })
   })
 
@@ -345,6 +379,26 @@ describe('DependencyLoader', () => {
       await loader.loadModule('non-module')
 
       assert.equal(loader.instances['non-module'], undefined)
+    })
+
+    it('should clear the load-timeout timer once onReady resolves', async () => {
+      let timeoutAccessed = false
+      const mockApp = {
+        rootDir: '/test',
+        getConfig: () => 25,
+        errors: {
+          get DEP_TIMEOUT () { timeoutAccessed = true; return new AdaptError('DEP_TIMEOUT') }
+        }
+      }
+      const loader = new DependencyLoader(mockApp)
+      const packageName = pathToFileURL(path.join(__dirname, 'data', 'fast-module.js')).href
+      loader.configs = { 'fast-module': { name: 'fast-module', module: true, packageName } }
+
+      await loader.loadModule('fast-module')
+      await wait(75)
+
+      assert.equal(timeoutAccessed, false, 'DEP_TIMEOUT should never be accessed after a successful load')
+      assert.ok(loader.instances['fast-module'])
     })
   })
 
