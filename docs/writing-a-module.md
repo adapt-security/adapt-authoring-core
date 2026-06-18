@@ -123,3 +123,32 @@ If you don't want to publish your module to npm, you can simply provide the URL 
   }
 }
 ```
+
+## Conventions
+
+Beyond structure and code, modules follow a few project-wide conventions.
+
+### Linting
+
+All code must pass [Standard.js](https://standardjs.com/) — no config file is needed. Run `npx standard` in the module root; it must pass before opening a PR.
+
+### Testing
+
+Write tests with `node:test` and `node:assert/strict` (see [Writing tests](writing-tests)). The project's testable-code conventions:
+
+- Extract discrete logic (transformations, mappers, predicates, validators) into one function per file under `lib/utils/<fn>.js`, re-exported via a `lib/utils.js` barrel.
+- Keep logic in the class only when it needs instance state, orchestrates side effects, or is a trivial one-liner delegating to a utility.
+- Each utility gets a matching `tests/utils-<name>.spec.js`, importing the file directly.
+- Use `mock.module()` (before the dynamic `import()`) when the function imports app modules; use table-driven tests for mappers and lookups.
+- Run unit tests with `node --experimental-test-module-mocks --test 'tests/**/*.spec.js'`.
+
+### Workflow and releases
+
+- Start from a clean `master` (`git checkout master && git pull`), then branch.
+- Commit with `Tag: description (fixes #N)` — the tag determines the release type (see [Contributing code](contributing-code)).
+- Merging to `master` triggers an **immediate** semantic-release publish; there is no staging step between merge and publish (see [Developer workflow](developer-workflow)).
+
+### Documentation
+
+- Document non-obvious behaviour in `docs/*.md` guides (built into the documentation site), not just inline comments. Cover what the module does, the APIs/seams it exposes, and any gotchas.
+- Keep the guides current: when a change alters documented behaviour, update the relevant `docs/*.md` in the **same PR**. Treat stale docs as a bug.
