@@ -40,6 +40,44 @@
       "description": "The default language used by the server",
       "type": "string",
       "default": "en"
+    },
+    "appName": {
+      "description": "Application name displayed in the UI header and browser tab",
+      "type": "string",
+      "default": "Adapt",
+      "_adapt": { "isPublic": true }
+    },
+    "primaryColour": {
+      "description": "Primary palette colour for the UI theme (hex format)",
+      "type": "string",
+      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+      "default": "#1ec0d9",
+      "_adapt": { "isPublic": true }
+    },
+    "chromeColour": {
+      "description": "Chrome colour (navy): icon rail, app bar, headings (hex format)",
+      "type": "string",
+      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+      "default": "#263944",
+      "_adapt": { "isPublic": true }
+    },
+    "commitColour": {
+      "description": "Commit colour (mint): the single affirmative action per view, e.g. Save/Create (hex format)",
+      "type": "string",
+      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+      "default": "#00dd95",
+      "_adapt": { "isPublic": true }
+    },
+    "accentColour": {
+      "description": "Accent colour (expressive) and the default decorative-icon ink; never a button fill (hex format)",
+      "type": "string",
+      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+      "default": "#ec4899",
+      "_adapt": { "isPublic": true }
+    },
+    "logo": {
+      "description": "Absolute path to a custom logo image (PNG recommended — email-safe) to bake into the UI build (overrides the built-in mark) and reuse in branded emails. Leave unset to use the built-in logo.",
+      "type": "string"
     }
   }
 }
