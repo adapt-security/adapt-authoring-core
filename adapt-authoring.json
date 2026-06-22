@@ -7,17 +7,21 @@
     "sourceIndex": "docs/index-backend.md",
     "manualPages": {
       "binscripts.md": "reference",
+      "configure-environment.md": "getting-started",
       "contributing.md": "contributing",
       "contributing-code.md": "contributing",
       "coremodules.md": "reference",
       "customising.md": "development",
+      "developer-workflow.md": "contributing",
+      "error-handling.md": "concepts",
       "folder-structure.md": "getting-started",
       "hooks.md": "concepts",
       "licensing.md": "reference",
       "releasing.md": "contributing",
       "request-response.md": "concepts",
       "run.md": "getting-started",
-      "writing-a-module.md": "development"
+      "writing-a-module.md": "development",
+      "writing-tests.md": "development"
     },
     "manualPlugins": [
       "docs/plugins/binscripts.js",
