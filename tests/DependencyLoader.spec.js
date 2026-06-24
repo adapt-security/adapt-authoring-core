@@ -506,6 +506,38 @@ describe('DependencyLoader', () => {
     })
   })
 
+  describe('#resolveModuleName()', () => {
+    it('should expand a short name to the canonical key', () => {
+      const loader = new DependencyLoader({ rootDir: '/test' })
+      assert.equal(loader.resolveModuleName('server'), 'adapt-authoring-server')
+    })
+
+    it('should leave a full name unchanged', () => {
+      const loader = new DependencyLoader({ rootDir: '/test' })
+      assert.equal(loader.resolveModuleName('adapt-authoring-server'), 'adapt-authoring-server')
+    })
+  })
+
+  describe('#isAvailable()', () => {
+    it('should return true for a present loadable module (short name)', () => {
+      const loader = new DependencyLoader({ rootDir: '/test' })
+      loader.configs = { 'adapt-authoring-server': { name: 'adapt-authoring-server', module: true } }
+      assert.equal(loader.isAvailable('server'), true)
+    })
+
+    it('should return false for a missing module', () => {
+      const loader = new DependencyLoader({ rootDir: '/test' })
+      loader.configs = {}
+      assert.equal(loader.isAvailable('server'), false)
+    })
+
+    it('should return false for a dependency declared module: false', () => {
+      const loader = new DependencyLoader({ rootDir: '/test' })
+      loader.configs = { 'adapt-authoring-docs': { name: 'adapt-authoring-docs', module: false } }
+      assert.equal(loader.isAvailable('docs'), false)
+    })
+  })
+
   describe('#logProgress()', () => {
     it('should not throw when called with valid instance', () => {
       const mockApp = { rootDir: '/test' }

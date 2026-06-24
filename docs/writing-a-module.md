@@ -98,6 +98,17 @@ export default class MyModule extends AbstractModule {
 }
 ```
 
+`waitForModule` rejects if the module isn't installed, so it's for **required** dependencies. For an **optional** integration, probe first with `App#isModuleAvailable` (which never throws) and only wait when it's present — don't `try/catch` `waitForModule`, as that conflates "not installed" with "installed but failed to load":
+
+```javascript
+if (this.app.isModuleAvailable('websocket')) {
+  const websocket = await this.app.waitForModule('websocket');
+  // wire up the optional integration
+}
+```
+
+Both accept short names (without the `adapt-authoring-` prefix).
+
 ### _Optional task: add a configuration schema_
 
 If you plan to add user-configurable settings to your module, you can add a `config.schema.json` to define which settings users need to add. See [this page](defining-config) for more information.
