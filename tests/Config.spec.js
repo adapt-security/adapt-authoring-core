@@ -1,7 +1,12 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import Config from '../lib/Config.js'
+import fs from 'fs/promises'
+import os from 'os'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+const dataDir = fileURLToPath(new URL('./data', import.meta.url))
 
 describe('Config', () => {
   describe('constructor', () => {
@@ -117,6 +122,29 @@ describe('Config', () => {
       const config = new Config()
       config.configFilePath = '/nonexistent/path/config.js'
       await assert.doesNotReject(() => config.storeUserSettings())
+    })
+
+    it('should load and flatten settings from the config file', async () => {
+      const config = new Config()
+      config.configFilePath = path.join(dataDir, 'user-config.js')
+      await config.storeUserSettings()
+      assert.equal(config.get('adapt-authoring-core.dataDir'), '/app/APP_DATA/data')
+      assert.equal(config.get('adapt-authoring-server.port'), 5000)
+    })
+
+    it('should load a config file whose path contains URL-significant characters', async () => {
+      // import() parses a bare path as a URL, so '#' (and Windows drive letters, core#122) break it
+      const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'adapt-cfg-#'))
+      const file = path.join(dir, 'config.js')
+      try {
+        await fs.writeFile(file, "export default { 'adapt-authoring-core': { dataDir: '/from/weird/path' } }\n")
+        const config = new Config()
+        config.configFilePath = file
+        await config.storeUserSettings()
+        assert.equal(config.get('adapt-authoring-core.dataDir'), '/from/weird/path')
+      } finally {
+        await fs.rm(dir, { recursive: true, force: true })
+      }
     })
   })
 })
