@@ -131,6 +131,22 @@ describe('DependencyLoader', () => {
       const names = Object.keys(loader.configs)
       assert.equal(names[0], 'adapt-authoring-core')
     })
+
+    it('should load configs when rootDir contains glob-significant characters', async () => {
+      // interpolating rootDir into the pattern would parse '[id]' as a char class (and '\' as an escape on Windows)
+      const root = path.join(__dirname, 'data', 'loadconfigs-root[id]')
+      const coreDir = path.join(root, 'node_modules', 'adapt-authoring-core')
+      try {
+        await fs.ensureDir(coreDir)
+        await fs.writeJson(path.join(coreDir, 'package.json'), { name: 'adapt-authoring-core' })
+        await fs.writeJson(path.join(coreDir, 'adapt-authoring.json'), { module: false })
+        const loader = new DependencyLoader({ rootDir: root, name: 'adapt-authoring-core' })
+        await loader.loadConfigs()
+        assert.ok(loader.configs['adapt-authoring-core'])
+      } finally {
+        await fs.remove(root)
+      }
+    })
   })
 
   describe('#loadConfigs() with nested duplicate', () => {
