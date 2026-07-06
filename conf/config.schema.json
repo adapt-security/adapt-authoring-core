@@ -82,6 +82,10 @@
     "projectPlaceholder": {
       "description": "Absolute path to a custom image to bake into the UI build as the default course/project thumbnail (used when a course has no hero image). Leave unset to use the built-in placeholder.",
       "type": "string"
+    },
+    "loginBackground": {
+      "description": "Absolute path to a custom full-screen login background image, served as a static asset by the UI build. Leave unset to use the built-in background.",
+      "type": "string"
     }
   }
 }
