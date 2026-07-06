@@ -78,6 +78,10 @@
     "logo": {
       "description": "Absolute path to a custom logo image (PNG recommended — email-safe) to bake into the UI build (overrides the built-in mark) and reuse in branded emails. Leave unset to use the built-in logo.",
       "type": "string"
+    },
+    "projectPlaceholder": {
+      "description": "Absolute path to a custom image to bake into the UI build as the default course/project thumbnail (used when a course has no hero image). Leave unset to use the built-in placeholder.",
+      "type": "string"
     }
   }
 }
