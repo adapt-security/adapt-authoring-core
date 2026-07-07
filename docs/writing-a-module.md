@@ -28,6 +28,7 @@ The below is what we recommend, and is the approach taken by the the core dev te
 | `adapt-authoring.json` | File | Adapt-specific metadata file used when initialising the app |
 | `package.json` | File | npm configuration file |
 | `routes.json` | File | _(Optional)_ Declarative route definitions for modules that expose HTTP endpoints. See [Handling server requests](server-requests.md) and [Authentication and permissions](auth-permissions.md) for details. |
+| `.github/workflows` | Folder | CI workflow definitions (release, lint, tests). See [Continuous integration](#continuous-integration). |
 
 ##### A note on exports:
 Your module class must be the **default export** — this is what `DependencyLoader` imports. For additional exports, use named exports:
@@ -158,6 +159,20 @@ Write tests with `node:test` and `node:assert/strict` (see [Writing tests](writi
 - Start from a clean `master` (`git checkout master && git pull`), then branch.
 - Commit with `Tag: description (fixes #N)` — the tag determines the release type (see [Contributing code](contributing-code)).
 - Merging to `master` triggers an **immediate** semantic-release publish; there is no staging step between merge and publish (see [Developer workflow](developer-workflow)).
+
+### Continuous integration
+
+Every module ships a `.github/workflows/` set so CI runs on GitHub. Copy these from an existing maintained module (e.g. `adapt-authoring-issues`) rather than writing them from scratch:
+
+- `releases.yml` — runs semantic-release on push to `master` (publishes the package).
+- `standardjs.yml` — runs `npx standard` on push to `master` and on pull requests.
+- `tests.yml` — runs `npm test` on push to `master` and on pull requests.
+
+Conventions:
+
+- Trigger CI on `push` to `master` **and** `pull_request` only — never a bare `on: push`, which fires on every branch push and wastes Actions minutes.
+- Do **not** include the legacy `new.yml` workflow; it is retired and fails under the `@cgkineo` org.
+- `@cgkineo` modules additionally include `addtomainproject.yml`, which adds newly opened issues and PRs to the org project board.
 
 ### Documentation
 
