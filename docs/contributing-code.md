@@ -62,6 +62,15 @@ All code must pass the [Standard.js](https://standardjs.com/) linter. Run it loc
 npx standard
 ```
 
+#### Cross-platform paths
+
+Modules run on Windows as well as POSIX, and two path bugs recur that are invisible on POSIX CI:
+
+- **Dynamic import of a filesystem path** must go through `pathToFileURL`. `import(somePath)` throws on Windows (`ERR_UNSUPPORTED_ESM_URL_SCHEME`) because a bare drive path isn't a valid URL — use `import(pathToFileURL(somePath).href)`.
+- **`glob()` must take the base directory via the `cwd` option**, not by interpolating it into the pattern. A Windows path contains backslashes and can contain glob metacharacters (`(`, `)`, `[`, `]`), so ``glob(`${dir}/*.js`)`` matches nothing or the wrong thing — use `glob('*.js', { cwd: dir })`.
+
+Add a regression test that exercises a path containing a `#` or `[id]` segment so these are caught on POSIX runners.
+
 ### Tests
 
 If you're adding new functionality, add tests to cover it. Run the test suite to make sure everything passes:
@@ -77,6 +86,11 @@ Keep documentation up to date with your changes:
 - **Code comments** — Add or update JSDoc comments for any new or modified functions, classes, or methods
 - **Manual pages** — If you're adding a feature or changing behaviour, update the relevant markdown guides in `docs/`
 - **REST API** — For API changes, ensure route metadata is accurate so the generated API docs stay current
+
+The API doc generator (`at-docgen`) parses JSDoc with jsdoc3, which fatally rejects two type syntaxes — a single bad tag aborts the whole build:
+
+- **No `import()` types.** `{import('./Foo.js').Foo}` fails. Declare an `@external` (or `@typedef`) for the type and reference it by name.
+- **No `?:` optional record fields.** `{{ name?: string }}` fails. Drop the `?` and describe optionality in prose instead.
 
 Good documentation helps others understand and use your work. See [Writing Documentation](writing-documentation) for more details.
 
