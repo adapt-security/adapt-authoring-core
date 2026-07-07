@@ -162,7 +162,7 @@ Write tests with `node:test` and `node:assert/strict` (see [Writing tests](writi
 
 ### Continuous integration
 
-Every module ships a `.github/workflows/` set so CI runs on GitHub. Copy these from an existing maintained module (e.g. `adapt-authoring-issues`) rather than writing them from scratch:
+Every module ships a `.github/workflows/` set so CI runs on GitHub. Copy these from an existing maintained module (e.g. `adapt-authoring-server`) rather than writing them from scratch:
 
 - `releases.yml` — runs semantic-release on push to `master` (publishes the package).
 - `standardjs.yml` — runs `npx standard` on push to `master` and on pull requests.
@@ -171,8 +171,7 @@ Every module ships a `.github/workflows/` set so CI runs on GitHub. Copy these f
 Conventions:
 
 - Trigger CI on `push` to `master` **and** `pull_request` only — never a bare `on: push`, which fires on every branch push and wastes Actions minutes.
-- Do **not** include the legacy `new.yml` workflow; it is retired and fails under the `@cgkineo` org.
-- `@cgkineo` modules additionally include `addtomainproject.yml`, which adds newly opened issues and PRs to the org project board.
+- Do **not** include the legacy `new.yml` workflow; it is retired.
 
 ### Documentation
 
