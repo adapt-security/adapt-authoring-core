@@ -41,6 +41,11 @@
       "type": "string",
       "default": "en"
     },
+    "logMissingLangStrings": {
+      "description": "Whether to log a startup warning for declared language keys that have no translation",
+      "type": "boolean",
+      "default": true
+    },
     "appName": {
       "description": "Application name displayed in the UI header and browser tab",
       "type": "string",
