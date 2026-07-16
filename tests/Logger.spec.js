@@ -28,6 +28,16 @@ describe('Logger', () => {
     })
   })
 
+  describe('.levels', () => {
+    it('should list every level in levelColours', () => {
+      assert.deepEqual([...Logger.levels].sort(), Object.keys(Logger.levelColours).sort())
+    })
+
+    it('should order levels by descending severity', () => {
+      assert.deepEqual(Logger.levels, ['error', 'warn', 'success', 'info', 'debug', 'verbose'])
+    })
+  })
+
   describe('.isLevelEnabled()', () => {
     it('should return true when level is in config', () => {
       assert.equal(Logger.isLevelEnabled(['error', 'warn'], 'error'), true)
