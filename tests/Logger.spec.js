@@ -29,12 +29,16 @@ describe('Logger', () => {
   })
 
   describe('.levels', () => {
-    it('should list every level in levelColours', () => {
-      assert.deepEqual([...Logger.levels].sort(), Object.keys(Logger.levelColours).sort())
-    })
-
     it('should order levels by descending severity', () => {
       assert.deepEqual(Logger.levels, ['error', 'warn', 'success', 'info', 'debug', 'verbose'])
+    })
+
+    it('should derive levelColours from the same source, in the same order', () => {
+      assert.deepEqual(Object.keys(Logger.levelColours), Logger.levels)
+    })
+
+    it('should map every level to a colour function', () => {
+      Logger.levels.forEach(level => assert.equal(typeof Logger.levelColours[level], 'function'))
     })
   })
 
