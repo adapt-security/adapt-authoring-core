@@ -60,6 +60,47 @@ describe('Lang', () => {
     })
   })
 
+  describe('#loadDefinitions()', () => {
+    it('should load string declarations from dependencies', async () => {
+      const stringsDir = path.join(testDir, 'strings')
+      await fs.ensureDir(stringsDir)
+      await fs.writeJson(path.join(stringsDir, 'strings.json'), {
+        'app.declared': { description: 'A declared key' }
+      })
+      const lang = new Lang()
+      lang.loadDefinitions({ test: { rootDir: testDir } }, testDir)
+      assert.equal(lang.definitions['app.declared'].description, 'A declared key')
+    })
+  })
+
+  describe('#validate()', () => {
+    it('should warn for declared keys with no translation', () => {
+      const lang = createLang({ en: { 'app.present': 'x' } })
+      lang.definitions = { 'app.present': {}, 'app.absent': {} }
+      const warnings = []
+      lang.log = (level, id, msg) => { if (level === 'warn') warnings.push(msg) }
+      const { missing } = lang.validate({ warnMissing: true })
+      assert.deepEqual(missing, ['app.absent'])
+      assert.ok(warnings.some(w => w.includes('app.absent')))
+    })
+
+    it('should not flag error.* keys (errors are out of scope)', () => {
+      const lang = createLang({ en: { 'app.a': 'x', 'error.SOME': 'y' } })
+      lang.definitions = { 'app.a': {} }
+      const { missing } = lang.validate({ warnMissing: false })
+      assert.deepEqual(missing, [])
+    })
+
+    it('should not warn when warnMissing is false', () => {
+      const lang = createLang({ en: {} })
+      lang.definitions = { 'app.absent': {} }
+      let warned = false
+      lang.log = () => { warned = true }
+      lang.validate({ warnMissing: false })
+      assert.equal(warned, false)
+    })
+  })
+
   describe('#translate()', () => {
     it('should return translated string', () => {
       const lang = createLang({ en: { hello: 'Hello' } })

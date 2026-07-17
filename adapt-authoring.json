@@ -16,6 +16,7 @@
       "error-handling.md": "concepts",
       "folder-structure.md": "getting-started",
       "hooks.md": "concepts",
+      "language-strings.md": "concepts",
       "licensing.md": "reference",
       "releasing.md": "contributing",
       "request-response.md": "concepts",
